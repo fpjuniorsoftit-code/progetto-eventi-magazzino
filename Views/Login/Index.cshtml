@@ -15,34 +15,41 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
     <style>
-            /* Palette ispirata al sito */
+            /* Palette verde corporativa */
             :root {
                 --verde-principale: #0e6b47;
                 --verde-scuro: #084c32;
-                --verde-sfondo: #6ca83b;
-                --verde-bordo-basso: #6ca83b;
+                --verde-sfondo: #eaf2ec;
+                --bordo-card: #cfe0d5;
             }
 
+            /* Layout flessibile a colonna: evita lo scroll verticale causato dalla barra superiore */
             body.login-page {
+                display: flex;
+                flex-direction: column;
                 min-height: 100vh;
                 margin: 0;
                 background-color: var(--verde-sfondo);
-                border-bottom: 8px solid var(--verde-bordo-basso);
+                border-bottom: 8px solid var(--verde-principale);
             }
 
+            /* Fascia decorativa superiore */
             .top-accent-bar {
                 height: 6px;
                 background-color: var(--verde-principale);
                 width: 100%;
+                flex-shrink: 0;
             }
 
+            /* Card centrale di autenticazione */
             .login-card {
                 width: 100%;
                 max-width: 460px;
                 padding: 32px;
-                background-color: #6B8E23;
-                border-radius: 10px;
+                background-color: #ffffff;
+                border: 1px solid var(--bordo-card);
                 border-top: 4px solid var(--verde-principale);
+                border-radius: 10px;
                 box-shadow: 0 6px 20px rgba(8, 76, 50, 0.08);
             }
 
@@ -57,11 +64,18 @@
                     margin-bottom: 4px;
                 }
 
+            .form-label {
+                font-weight: 600;
+                color: #1b2a22;
+            }
+
+            /* Focus dei campi allineato al verde principale */
             .form-control:focus {
                 border-color: var(--verde-principale);
                 box-shadow: 0 0 0 0.2rem rgba(14, 107, 71, 0.18);
             }
 
+            /* Pulsante primario di accesso */
             .btn-login {
                 background-color: var(--verde-principale);
                 border-color: var(--verde-principale);
@@ -81,12 +95,13 @@
 <body class="login-page">
     <div class="top-accent-bar" aria-hidden="true"></div>
 
-    <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center px-3 py-4">
+    <!-- flex-grow-1 occupa lo spazio residuo tra barra superiore e bordo inferiore -->
+    <main class="d-flex flex-column flex-grow-1 justify-content-center align-items-center px-3 py-4">
 
         <div class="login-card">
             <div class="login-title">
-                <h3 class="text-light">Gestione Eventi Magazzino</h3>
-                <p class="text-light">Accedi al sistema</p>
+                <h3>Gestione Eventi Magazzino</h3>
+                <p class="text-muted mb-0">Accedi al sistema</p>
             </div>
 
             <form asp-controller="Login" asp-action="Index" method="post">
@@ -94,6 +109,7 @@
                 <!-- Conserva l'URL originale in caso di reindirizzamento da risorsa protetta -->
                 <input type="hidden" asp-for="ReturnUrl" />
 
+                <!-- Mostra eventuali errori generali di autenticazione (es. credenziali non valide) -->
                 <div asp-validation-summary="ModelOnly"
                      class="text-danger mb-3"></div>
 
@@ -131,11 +147,11 @@
                  style="max-width: 260px; height: auto;" />
         </footer>
 
-    </div>
+    </main>
 
-    <!-- Ordine richiesto: jQuery -> jQuery Validate -> Unobtrusive Validation -->
+    <!-- Ordine obbligatorio per la validazione lato client: jQuery -> Validate -> Unobtrusive -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
 </body>
 </html>

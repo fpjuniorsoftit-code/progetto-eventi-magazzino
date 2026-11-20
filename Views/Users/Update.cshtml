@@ -4,140 +4,232 @@
     ViewData["Title"] = "Aggiorna utente";
     Layout = null; // toglie header e footer
 }
-
-<style>
-    .login-card {
-        background: yellow;
-    }
-</style>
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- collegamento al file css personalizzato per sfondo -->
-    <link rel="stylesheet" href="~/css/personalizzazione.css" />
-    <title>Aggiorna utente</title>
+    <!-- BOOTSTRAP -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>Aggiorna utente - Gestione Eventi Magazzino</title>
+    <style>
+            /* Palette ispirata al sito */
+            :root {
+                --verde-principale: #0e6b47;
+                --verde-scuro: #084c32;
+                --verde-sfondo: #eaf2ec;
+                --verde-bordo-basso: #0e6b47;
+                --bordo-card: #cfe0d5;
+            }
+
+            /* Layout a colonna per tenere il footer in fondo senza creare scorrimenti superflui */
+            body.update-page {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+                margin: 0;
+                background-color: var(--verde-sfondo);
+                border-bottom: 8px solid var(--verde-bordo-basso);
+            }
+
+            /* Fascia superiore verde coerente con il tema */
+            .top-header-bar {
+                background-color: var(--verde-principale);
+                color: #ffffff;
+                padding: 0.75rem 1rem;
+                border-bottom: 3px solid var(--verde-scuro);
+                flex-shrink: 0;
+            }
+
+            .top-header-title {
+                font-size: 1rem;
+                font-weight: 700;
+                letter-spacing: 0.3px;
+                margin: 0;
+            }
+
+            /* Card più ampia e bilanciata per evitare l'effetto stretto e alto */
+            .update-card {
+                width: 100%;
+                max-width: 720px;
+                padding: 32px;
+                background-color: #fff;
+                border: 1px solid var(--bordo-card);
+                border-radius: 10px;
+                border-top: 4px solid var(--verde-principale);
+                box-shadow: 0 6px 20px rgba(8, 76, 50, 0.08);
+            }
+
+            .update-title {
+                text-align: center;
+                margin-bottom: 24px;
+            }
+
+                .update-title h2 {
+                    color: var(--verde-scuro);
+                    font-weight: 700;
+                    margin-bottom: 0;
+                }
+
+            .form-label {
+                font-weight: 600;
+            }
+
+            /* Campo in sola lettura leggermente distinto per chiarezza visiva */
+            .form-control[readonly] {
+                background-color: #f4f7f5;
+                color: #52665b;
+            }
+
+            .form-control:focus,
+            .form-check-input:focus {
+                border-color: var(--verde-principale);
+                box-shadow: 0 0 0 0.2rem rgba(14, 107, 71, 0.18);
+            }
+
+            .form-check-input:checked {
+                background-color: var(--verde-principale);
+                border-color: var(--verde-principale);
+            }
+
+            /* Pulsante principale di salvataggio */
+            .btn-update {
+                background-color: var(--verde-principale);
+                border-color: var(--verde-principale);
+                color: #ffffff;
+                font-weight: 600;
+                padding: 10px 16px;
+            }
+
+                .btn-update:hover,
+                .btn-update:focus {
+                    background-color: var(--verde-scuro);
+                    border-color: var(--verde-scuro);
+                    color: #ffffff;
+                }
+    </style>
 </head>
-<body class="sfondoAdmin">
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
+<body class="update-page">
+    <!-- Barra superiore verde coerente con il design di riferimento -->
+    <header class="top-header-bar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <span class="top-header-title">Gestione Eventi Magazzino — Amministrazione</span>
+            <!-- Link al pannello admin -->
+            <a asp-controller="Admin" asp-action="Index" class="btn btn-sm btn-outline-light m-0">
+                Pannello admin
+            </a>
+        </div>
+    </header>
 
-                <div class="card shadow-sm">
-                    <div class="card-body p-4 login-card">
-                        <!-- applico il giallo -->
+    <main class="d-flex flex-column flex-grow-1 justify-content-center align-items-center px-3 py-4">
 
-                        <h2 class="mb-4 ">Aggiornamento utente</h2>
+        <div class="update-card">
+            <div class="update-title">
+                <h2>Aggiornamento utente</h2>
+            </div>
 
-                        @if (TempData["SuccessMessage"] != null)
-                        {
-                            <div class="alert alert-success">
-                                @TempData["SuccessMessage"]
-                            </div>
-                        }
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
 
-                        <!-- Form principale per l'aggiornamento dell'utente -->
+            <!-- Form principale per l'aggiornamento dell'utente -->
+            <form asp-controller="Users"
+                  asp-action="Update"
+                  method="post">
 
-						
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
 
-                        <form asp-controller="Users"
-                              asp-action="Update"
-                              method="post">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Username" class="form-label"></label>
+                        <input asp-for="Username" class="form-control" readonly /> <!-- username non deve poter essere modificato -->
+                        <span asp-validation-for="Username"
+                              class="text-danger"></span>
+                    </div>
 
-                            <div asp-validation-summary="ModelOnly"
-                                 class="text-danger mb-3"></div>
-
-                            <div class="mb-3">
-                                <label asp-for="Username" class="form-label"></label>
-                                <input asp-for="Username" class="form-control" readonly/> <!--username non deve poter essere modificato-->
-                                <span asp-validation-for="Username"
-                                      class="text-danger"></span>
-                            </div>
-
-                            <div class="mb-3">
-                                <label asp-for="Email" class="form-label"></label>
-                                <input asp-for="Email" class="form-control" />
-                                <span asp-validation-for="Email"
-                                      class="text-danger"></span>
-                            </div>
-
-                            <div class="mb-3">
-                                <label asp-for="Password" class="form-label"></label>
-                                <input asp-for="Password" type="password"
-                                       class="form-control"
-                                       placeholder="Lascia vuoto per mantenere la password attuale" />
-                                <span asp-validation-for="Password" class="text-danger"></span>
-                            </div>
-
-                            <div class="mb-3">
-                                <label asp-for="ConfirmPassword" class="form-label">
-                                    Conferma password
-                                </label>
-                                <input asp-for="ConfirmPassword" type="password"
-                                       class="form-control" />
-                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                            </div>
-
-                            <div class="mb-3">
-                                <label asp-for="Note" class="form-label"></label>
-                                <textarea asp-for="Note"
-                                          class="form-control"
-                                          rows="3"></textarea>
-                                <span asp-validation-for="Note"
-                                      class="text-danger"></span>
-                            </div>
-
-                            <div class="form-check mb-4">
-                                <input asp-for="IsAdmin" class="form-check-input" />
-                                <label asp-for="IsAdmin" class="form-check-label">
-                                    Amministratore
-                                </label>
-                            </div>
-                         
-                            <button type="submit" class="btn btn-danger w-100">
-                                Aggiorna utente
-                            </button>
-                           
-                        </form>
-                        <!-- Fine form principale -->
-                        <!-- Contenitore flessibile per i bottoni inferiori affiancati -->
-                        <div class="d-flex justify-content-between mt-3">
-
-                            <!-- Form per andare alla dashboard -->
-                            <form asp-controller="Home" asp-action="Index" method="get" class="m-0">
-                                <button type="submit" class="btn btn-secondary">
-                                    Vai alla dashboard
-                                </button>
-                            </form>
-
-                            <!-- Form per il Logout -->
-                            <form asp-controller="Login" asp-action="Logout" method="post" class="m-0">
-                                <button type="submit" class="btn btn-danger">
-                                    Logout
-                                </button>
-                            </form>
-                            <!-- Form per pannello admin-->
-                            <a asp-controller="Admin" asp-action="Index" class="btn btn-danger m-0">
-                                Pannello admin
-                            </a>
-
-
-                        </div>
-
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email"
+                              class="text-danger"></span>
                     </div>
                 </div>
 
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" type="password"
+                               class="form-control"
+                               placeholder="Lascia vuoto per mantenere la password attuale" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ConfirmPassword" class="form-label">
+                            Conferma password
+                        </label>
+                        <input asp-for="ConfirmPassword" type="password"
+                               class="form-control" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Note" class="form-label"></label>
+                    <textarea asp-for="Note"
+                              class="form-control"
+                              rows="3"></textarea>
+                    <span asp-validation-for="Note"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="IsAdmin" class="form-check-input" />
+                    <label asp-for="IsAdmin" class="form-check-label">
+                        Amministratore
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-update w-100">
+                    Aggiorna utente
+                </button>
+
+            </form>
+            <!-- Fine form principale -->
+            <!-- Contenitore flessibile per i bottoni inferiori affiancati -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 pt-3 border-top">
+
+                <!-- Form per andare alla dashboard -->
+                <form asp-controller="Home" asp-action="Index" method="get" class="m-0">
+                    <button type="submit" class="btn btn-outline-secondary">
+                        Vai alla dashboard
+                    </button>
+                </form>
+
+                <!-- Form per il Logout -->
+                <form asp-controller="Login" asp-action="Logout" method="post" class="m-0">
+                    <button type="submit" class="btn btn-outline-danger">
+                        Logout
+                    </button>
+                </form>
+
             </div>
         </div>
-    </div>
-    <div>
+
         <footer class="text-center pb-3 mt-4">
-            <img src="~/images/sfondoJRgreen.jpeg" alt="Mia Immagine" width="300" height="100">
+            <img src="~/images/sfondoJRgreen.jpeg" alt="Logo JUNIORSOFT" class="img-fluid" style="max-width: 260px; height: auto;" />
         </footer>
-    </div>
+
+    </main>
+
+    <!-- jQuery -> jQuery Validate -> Unobtrusive Validation -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
 </body>
 </html>
