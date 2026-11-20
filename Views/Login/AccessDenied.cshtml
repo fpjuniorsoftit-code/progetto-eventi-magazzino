@@ -10,22 +10,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Accesso negato</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <style>
+            /* Disposizione verticale per impilare riquadro e logo sotto */
+            body {
+                background: linear-gradient(135deg, #0e6b47, #6ca83b);
+                color: #fff;
+                display: flex;
+                flex-direction: column; /*questo permette di mettere il contenuto in colonna cosi la card rimane sopra e il logo sotto*/
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+                padding: 1.5rem;
+                text-align: center;
+            }
+
+            .error-container {
+                background: rgba(0, 0, 0, 0.55);
+                border-radius: 10px;
+                padding: 2.5rem 2rem;
+                max-width: 600px;
+                width: 100%;
+            }
+    </style>
 </head>
-<body class="bg-light">
+<body>
+    <div class="error-container">
+        <h1 class="text-warning fw-bold">Accesso negato</h1>
 
-    <div class="container text-center mt-5">
-        <h1 class="text-danger">Accesso negato</h1>
-
-        <p class="mt-3">
+        <p class="mt-3 mb-4 text-light">
             Non disponi dei permessi necessari per accedere a questa funzionalità.
         </p>
 
         <a asp-controller="Home"
            asp-action="Index"
-           class="btn btn-primary mt-3">
+           class="btn btn-light fw-semibold">
             Torna alla pagina principale
         </a>
     </div>
 
+    <footer class="mt-4">
+        <img src="~/images/sfondoJRgreen.jpeg"
+             alt="Logo JUNIORSOFT"
+             class="img-fluid rounded"
+             style="max-width: 260px; height: auto;" />
+    </footer>
 </body>
 </html>

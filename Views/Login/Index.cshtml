@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Accesso";
-    Layout = null; // Mantiene la pagina completamente indipendente
+    Layout = null; // Pagina autonoma senza layout condiviso
 }
 
 <!DOCTYPE html>
@@ -12,46 +12,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Accesso - Gestione Eventi Magazzino</title>
 
-    <!-- Bootstrap -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    <!-- Collegamento al file CSS personalizzato -->
-    <link rel="stylesheet" href="~/css/personalizzazione.css" />
-
     <style>
-            body {
+            /* Palette ispirata al sito */
+            :root {
+                --verde-principale: #0e6b47;
+                --verde-scuro: #084c32;
+                --verde-sfondo: #6ca83b;
+                --verde-bordo-basso: #6ca83b;
+            }
+
+            body.login-page {
                 min-height: 100vh;
                 margin: 0;
+                background-color: var(--verde-sfondo);
+                border-bottom: 8px solid var(--verde-bordo-basso);
+            }
+
+            .top-accent-bar {
+                height: 6px;
+                background-color: var(--verde-principale);
+                width: 100%;
             }
 
             .login-card {
                 width: 100%;
-                max-width: 600px; /* Larghezza portata a 600px */
-                padding: 35px;
-                background: yellow;
-                border-radius: 12px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+                max-width: 460px;
+                padding: 32px;
+                background-color: #6B8E23;
+                border-radius: 10px;
+                border-top: 4px solid var(--verde-principale);
+                box-shadow: 0 6px 20px rgba(8, 76, 50, 0.08);
             }
 
             .login-title {
                 text-align: center;
-                margin-bottom: 25px;
+                margin-bottom: 24px;
             }
+
+                .login-title h3 {
+                    color: var(--verde-scuro);
+                    font-weight: 700;
+                    margin-bottom: 4px;
+                }
+
+            .form-control:focus {
+                border-color: var(--verde-principale);
+                box-shadow: 0 0 0 0.2rem rgba(14, 107, 71, 0.18);
+            }
+
+            .btn-login {
+                background-color: var(--verde-principale);
+                border-color: var(--verde-principale);
+                color: #ffffff;
+                font-weight: 600;
+                padding: 10px 16px;
+            }
+
+                .btn-login:hover,
+                .btn-login:focus {
+                    background-color: var(--verde-scuro);
+                    border-color: var(--verde-scuro);
+                    color: #ffffff;
+                }
     </style>
 </head>
-<body class="sfondoLogin">
-    <!--w-100 ha permesso alla login card di allargarsi->
-    <!-- Incorpora il footer e il body in un unico div, mettendo l'img sotto il form -->
-    <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center w-100 px-3">
+<body class="login-page">
+    <div class="top-accent-bar" aria-hidden="true"></div>
+
+    <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center px-3 py-4">
 
         <div class="login-card">
             <div class="login-title">
-                <h3>Gestione Eventi</h3>
-                <p class="text-muted">Accedi al sistema</p>
+                <h3 class="text-light">Gestione Eventi Magazzino</h3>
+                <p class="text-light">Accedi al sistema</p>
             </div>
 
             <form asp-controller="Login" asp-action="Index" method="post">
 
+                <!-- Conserva l'URL originale in caso di reindirizzamento da risorsa protetta -->
                 <input type="hidden" asp-for="ReturnUrl" />
 
                 <div asp-validation-summary="ModelOnly"
@@ -77,22 +117,25 @@
                           class="text-danger"></span>
                 </div>
 
-                <button type="submit" class="btn btn-danger w-100">
+                <button type="submit" class="btn btn-login w-100">
                     Accedi
                 </button>
 
             </form>
         </div>
 
-        <!-- Logo JUNIORSOFT -->
-        <footer class="text-center pb-3 mt-4">
-            <img src="~/images/sfondoJRgreen.jpeg" alt="Mia Immagine" width="300" height="100">
+        <footer class="text-center mt-4">
+            <img src="~/images/sfondoJRgreen.jpeg"
+                 alt="Logo JUNIORSOFT"
+                 class="img-fluid"
+                 style="max-width: 260px; height: auto;" />
         </footer>
 
     </div>
 
+    <!-- Ordine richiesto: jQuery -> jQuery Validate -> Unobtrusive Validation -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 </body>
 </html>
