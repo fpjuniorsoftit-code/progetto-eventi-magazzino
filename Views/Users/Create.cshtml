@@ -1,0 +1,139 @@
+@model GestionEventiMagazzino.ViewModels.CreateUserViewModel
+
+@{
+    ViewData["Title"] = "Crea utente";
+    Layout = null; // toglie header e footer
+}
+
+<style>
+    .login-card {
+        background: yellow;
+    }
+</style>
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- collegamento al file css personalizzato per sfondo -->
+    <link rel="stylesheet" href="~/css/personalizzazione.css" />
+    <title>Crea utente</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+</head>
+<body class="sfondoAdmin">
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+
+                <div class="card shadow-sm">
+                    <div class="card-body p-4 login-card">
+                        <!-- applico il giallo -->
+
+                        <h2 class="mb-4 ">Creazione nuovo utente</h2>
+
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">
+                                @TempData["SuccessMessage"]
+                            </div>
+                        }
+
+                        <!-- Form principale per la creazione dell'utente -->
+                        <form asp-controller="Users"
+                              asp-action="Create"
+                              method="post">
+
+                            <div asp-validation-summary="ModelOnly"
+                                 class="text-danger mb-3"></div>
+
+                            <div class="mb-3">
+                                <label asp-for="Username" class="form-label"></label>
+                                <input asp-for="Username" class="form-control" />
+                                <span asp-validation-for="Username"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" />
+                                <span asp-validation-for="Email"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Password" class="form-label"></label>
+                                <input asp-for="Password" type="password" class="form-control" />
+                                <span asp-validation-for="Password"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="ConfirmPassword" class="form-label">
+                                    Conferma password
+                                </label>
+                                <input asp-for="ConfirmPassword" class="form-control" />
+                                <span asp-validation-for="ConfirmPassword"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Note" class="form-label"></label>
+                                <textarea asp-for="Note"
+                                          class="form-control"
+                                          rows="3"></textarea>
+                                <span asp-validation-for="Note"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="form-check mb-4">
+                                <input asp-for="IsAdmin" class="form-check-input" />
+                                <label asp-for="IsAdmin" class="form-check-label">
+                                    Amministratore
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-danger w-100">
+                                Crea utente
+                            </button>
+
+                        </form>
+                        <!-- Fine form principale -->
+                        <!-- Contenitore flessibile per i bottoni inferiori affiancati -->
+                        <div class="d-flex justify-content-between mt-3">
+
+                            <!-- Form per andare alla dashboard -->
+                            <form asp-controller="Home" asp-action="Index" method="get" class="m-0">
+                                <button type="submit" class="btn btn-secondary">
+                                    Vai alla dashboard
+                                </button>
+                            </form>
+
+                            <!-- Form per il Logout -->
+                            <form asp-controller="Login" asp-action="Logout" method="post" class="m-0">
+                                <button type="submit" class="btn btn-danger">
+                                    Logout
+                                </button>
+                            </form>
+                            <!-- Form per pannello admin-->
+                            <a asp-controller="Admin" asp-action="Index" class="btn btn-danger m-0">
+                                Pannello admin
+                            </a>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div>
+        <footer class="text-center pb-3 mt-4">
+            <img src="~/images/sfondoJRgreen.jpeg" alt="Mia Immagine" width="300" height="100">
+        </footer>
+    </div>
+</body>
+</html>

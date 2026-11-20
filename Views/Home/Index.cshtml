@@ -1,0 +1,445 @@
+﻿
+@model List<GestionEventiMagazzino.Models.EventoMagazzino>
+
+@{
+    ViewData["Title"] = "Home";
+    Layout = null; // Mantiene la pagina completamente indipendente
+}
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Collegamento al file CSS personalizzato -->
+    <link rel="stylesheet" href="~/css/personalizzazione.css" />
+</head>
+
+<body class="sfondoAdmin min-vh-100">
+
+    <!-- min-vh-100 permette allo sfondo di estendersi su tutta la pagina -->
+
+    <div class="container-fluid pt-4">
+
+        <h2 class="mb-4 text-white">Gestione Eventi Magazzino</h2>
+
+        <div class="card shadow-sm bg-warning">
+
+            <div class="card-header d-flex justify-content-between align-items-center">
+
+                <h5 class="mb-0">Eventi (incluso ieri, oggi e 5 giorni in avanti)</h5>
+
+                <!-- Contenitore flessibile per affiancare i bottoni con spaziatura corretta -->
+                <div class="d-flex align-items-center gap-2">
+
+                    <a asp-controller="Events" asp-action="Create" class="btn btn-danger">
+                        Creazione nuovi eventi
+                    </a>
+
+                    <a asp-controller="Admin" asp-action="Index" class="btn btn-danger">
+                        Pannello admin
+                    </a>
+
+                    <form asp-controller="Login" asp-action="Logout" method="post" class="d-inline mb-0">
+
+                        <!-- Rimosso btn-lg per renderlo della stessa dimensione e aggiunto type="submit" -->
+                        <button type="submit" class="btn btn-danger">
+                            Logout
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+            <div class="card-body bg-warning">
+
+                <div class="table-responsive">
+
+                    <table class="table table-striped table-hover align-middle">
+
+                        <thead class="table-dark">
+
+                            <tr>
+
+                                <th>Evento</th>
+
+                                <th>
+                                    Data evento
+
+                                    <button type="button"
+                                            class="btn @(ViewBag.DataFiltro != null ? "btn-danger" : "btn-outline-light")"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#filtroData">
+
+                                        <i class="bi bi-funnel"></i>
+                                        <!-- i indica l'icona. funnel è l'icona del filtro -->
+
+                                    </button>
+
+                                </th>
+
+                                <th>Ora inizio</th>
+
+                                <th>Ora fine</th>
+
+                                <th>
+                                    Stato
+
+                                    <button type="button"
+                                            class="btn @(ViewBag.StatoFiltro != null ? "btn-danger" : "btn-outline-light")"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#filtroStato">
+
+                                        <i class="bi bi-funnel"></i>
+                                        <!-- i indica l'icona. funnel è l'icona del filtro -->
+
+                                    </button>
+
+                                </th>
+
+                                <th class="text-center">
+                                    Operatore assegnatario
+
+                                    <button type="button"
+                                            class="btn @(ViewBag.UsernameFiltro != null ? "btn-danger" : "btn-outline-light")"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#filtroUsername">
+
+                                        <i class="bi bi-funnel"></i>
+                                        <!-- i indica l'icona. funnel è l'icona del filtro -->
+
+                                    </button>
+
+                                </th>
+
+                                <th>Persone coinvolte</th>
+
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <th>Azioni</th>
+                                }
+
+                            </tr>
+
+                        </thead>
+
+                       <!--QUI VIENE RICHIAMATO IL FILE DELLA PARTIAL VIEW PER SIGNALR: la tabella continuerà a funzionare come prima ma le righe verranno caricate nella nuova partial view-->
+                            <tbody id="righeEventi">
+                                @await Html.PartialAsync("_RigheEventi", Model)
+                            </tbody>
+                        
+
+                    </table>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Logo JUNIORSOFT -->
+    <footer class="text-center pb-3 mt-4">
+
+        <img src="~/images/sfondoJRgreen.jpeg"
+             alt="Mia Immagine"
+             width="300"
+             height="100">
+
+    </footer>
+
+
+    <!-- ====================================================== -->
+    <!-- MODALE DATA                                            -->
+    <!-- ====================================================== -->
+
+    <div class="modal fade" id="filtroData" tabindex="-1">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <!-- Il form si trova dentro modal-content perché
+                     contiene tutta la parte visibile del modale. -->
+                <form asp-controller="Home" asp-action="Index" method="get">
+
+                    <!-- Conserva lo username già selezionato quando si applica il filtro data -->
+                    <input type="hidden" name="username" value="@ViewBag.UsernameFiltro" />
+
+                    <!-- Conserva lo stato già selezionato quando si applica il filtro data -->
+                    <input type="hidden" name="stato" value="@ViewBag.StatoFiltro" />
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">Filtra eventi per data</h5>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <label class="form-label">Seleziona una data</label>
+
+                        <!-- Mantiene visibile la data precedentemente selezionata -->
+                        <input type="date"
+                               name="data"
+                               class="form-control"
+                               value="@ViewBag.DataFiltro"
+                               required />
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="submit" class="btn btn-danger">
+                            Applica filtro
+                        </button>
+
+                        <!-- Rimuove tutti i filtri tornando alla dashboard di oggi -->
+                        <a asp-controller="Home"
+                           asp-action="Index"
+                           class="btn btn-secondary">
+
+                            Rimuovi filtro
+
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ====================================================== -->
+    <!-- MODALE STATO                                           -->
+    <!-- ====================================================== -->
+
+    <div class="modal fade" id="filtroStato" tabindex="-1">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <!-- Il form conserva gli altri filtri tramite gli input hidden -->
+                <form asp-controller="Home" asp-action="Index" method="get">
+
+                    <!-- Conserva la data già selezionata quando si applica il filtro stato -->
+                    <input type="hidden" name="data" value="@ViewBag.DataFiltro" />
+
+                    <!-- Conserva lo username già selezionato quando si applica il filtro stato -->
+                    <input type="hidden" name="username" value="@ViewBag.UsernameFiltro" />
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">Filtra eventi per stato</h5>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <label class="form-label">Seleziona uno stato</label>
+
+                        <select name="stato" class="form-select" required>
+
+                            <option value="">Seleziona uno stato</option>
+
+                            <!-- selected mantiene evidenziato lo stato già scelto -->
+                            <option value="IN CORSO"
+                                    selected="@(ViewBag.StatoFiltro?.ToString() == "IN CORSO")">
+                                In corso
+                            </option>
+
+                            <option value="SOSPESO"
+                                    selected="@(ViewBag.StatoFiltro?.ToString() == "SOSPESO")">
+                                Sospeso
+                            </option>
+
+                            <option value="CANCELLATO"
+                                    selected="@(ViewBag.StatoFiltro?.ToString() == "CANCELLATO")">
+                                Annullato
+                            </option>
+
+                            <option value="CHIUSO"
+                                    selected="@(ViewBag.StatoFiltro?.ToString() == "CHIUSO")">
+                                Chiuso
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="submit" class="btn btn-danger">
+                            Applica filtro
+                        </button>
+
+                        <!-- Rimuove tutti i filtri tornando alla dashboard di oggi -->
+                        <a asp-controller="Home"
+                           asp-action="Index"
+                           class="btn btn-secondary">
+
+                            Rimuovi filtro
+
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ====================================================== -->
+    <!-- MODALE USERNAME                                        -->
+    <!-- ====================================================== -->
+
+    <div class="modal fade" id="filtroUsername" tabindex="-1">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <!-- Il form invia lo username selezionato al controller-->
+                <form asp-controller="Home" asp-action="Index" method="get">
+                    <!-- Conserva la data già selezionata quando si applica il filtro stato -->
+                    <input type="hidden" name="data" value="@ViewBag.DataFiltro" />
+                    <!-- Conserva lo stato già selezionato quando si applica il filtro data -->
+                    <input type="hidden" name="stato" value="@ViewBag.StatoFiltro" />
+                
+                <div class="modal-header">
+
+                    <h5 class="modal-title">Filtra eventi per operatore</h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+
+                </div>
+
+                <div class="modal-body">
+                    <label class="form-label">Seleziona uno username</label>
+
+                    <select name="username" class="form-select" required>
+                        <option value="">Seleziona un operatore</option>
+
+                        <!--
+                            Visualizza tutti gli username ricevuti dal Controller.
+                            Se uno username è già stato selezionato, lo mantiene evidenziato.
+                        -->
+                        @foreach (var utente in ViewBag.Utenti)
+                        {
+                            <option value="@utente"
+                                    selected="@(ViewBag.UsernameFiltro?.ToString() == utente)"> <!--selected controlla quale nome utente deve rimanere selezionato-->
+                                @utente
+                            </option>
+                        }
+
+                    </select>
+                    </div>
+                    <div class="modal-footer">
+
+                        <button type="submit" class="btn btn-danger">
+                            Applica filtro
+                        </button>
+
+                        <!-- Rimuove tutti i filtri tornando alla dashboard di oggi -->
+                        <a asp-controller="Home"
+                           asp-action="Index"
+                           class="btn btn-secondary">
+
+                            Rimuovi filtro
+
+                        </a>
+
+                </div>
+                    </form>
+            </div>
+
+        </div>
+
+    </div>
+   
+    <!--Libreria signalR: incollo il percorso del file signalr.min.js, compreso nell'installazione della libreria-->
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+
+    <!-- Bootstrap per modali: lo script viene caricato dopo i modali -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+   
+    <script>
+
+            // Creo la connessione con l'Hub di SignalR
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/eventiHub")
+                .build();
+
+
+            // Funzione che recupera e aggiorna le righe della tabella
+            async function aggiornaEventi() {
+
+                // Richiedo al server le righe aggiornate
+                const risposta = await fetch(window.location.href, {
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+
+                // Verifico che la richiesta sia andata a buon fine
+                if (!risposta.ok) {
+                    throw new Error("Errore durante l'aggiornamento degli eventi");
+                }
+
+                // Recupero il codice HTML delle nuove righe
+                const html = await risposta.text();
+
+                // Sostituisco le righe presenti nella tabella
+                document.getElementById("righeEventi").innerHTML = html;
+            }
+
+
+            // Quando il server comunica che gli eventi sono cambiati
+            connection.on("AggiornaEventi", aggiornaEventi);
+
+
+            // Avvio la connessione SignalR
+            connection.start()
+                .then(() => console.log("Connessione SignalR stabilita!"))
+                .catch(err => console.error("Errore di connessione", err));
+
+
+            // Aggiorno automaticamente gli eventi ogni 10 secondi (solo per il test)
+            setInterval(() => {
+
+                console.log("Aggiornamento automatico avviato");
+
+                aggiornaEventi()
+                    .then(() => console.log("Tabella aggiornata"))
+                    .catch(err => console.error("Errore aggiornamento automatico", err));
+
+            }, 60000);
+
+    </script>
+
+
+</body>

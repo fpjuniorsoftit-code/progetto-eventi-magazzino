@@ -1,0 +1,114 @@
+﻿@model List<string>
+
+@{
+    ViewData["Title"] = "Pannello amministratore";
+    Layout = null; // Mantiene la pagina indipendente (senza layout globale)
+}
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pannello amministratore</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Collegamento al file CSS personalizzato per lo sfondo admin -->
+    <link rel="stylesheet" href="~/css/personalizzazione.css" />
+</head>
+<body class="sfondoAdmin">
+
+    <!-- Contenitore principale a tutta altezza con flex per spingere il footer in basso -->
+    <div class="d-flex flex-column min-vh-100 w-100 justify-content-between align-items-center py-4">
+
+        <div class="container mt-4 text-center">
+            <h2 class="mb-5 text-white">Pannello amministratore</h2>
+
+            <!-- 1. PRIMA RIGA: Immagini e bottoni per Creazione Utenti e Dashboard -->
+            <div class="row justify-content-center g-4 mb-4">
+
+                <!-- Colonna: Creazione Utenti -->
+                <div class="col-auto d-flex flex-column align-items-center">
+                    <img src="~/images/CreazioneUtentiBottone.png" alt="Creazione Utenti" class="rounded shadow-sm mb-3" style="width: 250px; height: 200px; object-fit: cover;" />
+                    <a asp-controller="Users" asp-action="Create" class="btn btn-danger btn-lg w-100">
+                        Creazione nuovi utenti
+                    </a>
+                </div>
+
+                <!-- Colonna: Dashboard -->
+                <div class="col-auto d-flex flex-column align-items-center">
+                    <img src="~/images/fotoPerBottoneDashboard.png" alt="Dashboard" class="rounded shadow-sm mb-3" style="width: 250px; height: 200px; object-fit: cover;" />
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-danger btn-lg w-100">
+                        Visualizza dashboard
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- 2. SECONDA RIGA: Sezione Modifica ed Eliminazione utenti affiancate -->
+            <div class="row justify-content-center g-4">
+
+                <!-- Colonna: Modifica utente -->
+                <div class="col-auto d-flex flex-column align-items-center" style="width: 250px;">
+                    <form asp-controller="Users" asp-action="Update" method="get" class="w-100">
+                        <select name="username" class="form-select mb-2" required>
+                            <option value="">Seleziona un operatore...</option>
+                            @foreach (var username in Model)
+                            {
+                                <option value="@username">@username</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-danger btn-lg w-100">
+                            Modifica utente
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Colonna: Eliminazione utente -->
+                <div class="col-auto d-flex flex-column align-items-center" style="width: 250px;">
+
+
+                    <form asp-controller="Users" 
+                    asp-action="Delete" 
+                    method="post" 
+                    class="w-100"
+                    onsubmit="return confirm('ATTENZIONE: NON E\' POSSIBILE ELIMINARE IL TUO STESSO ACCOUNT. SICURO DI VOLER ELIMINARE L\'UTENTE?');"> <!--mettere \ davanti l'apice piccolo evita di creare conflitti con javascript che interpeta l'apice singolo come apertura-chiusura della stringa->
+                        @Html.AntiForgeryToken() <!--protegge il form da attacchi-->
+
+
+                        
+                    <select name="username" class="form-select mb-2" required>
+                            <option value="">Seleziona un operatore...</option>
+                            @foreach (var username in Model)
+                            {
+                                <option value="@username">@username</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-danger btn-lg w-100">
+                            Elimina utente
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- 3. FOOTER E LOGOUT: Raggruppati in basso al centro -->
+        <div class="text-center pt-4">
+            <div class="mb-3">
+                <form asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger btn-lg px-4">
+                        Logout
+                    </button>
+                </form>
+            </div>
+            <footer>
+                <img src="~/images/sfondoJRgreen.jpeg" alt="Logo Aziendale" width="300" height="100">
+            </footer>
+        </div>
+
+    </div>
+
+</body>
+</html>

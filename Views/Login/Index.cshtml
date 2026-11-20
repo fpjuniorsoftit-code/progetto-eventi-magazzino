@@ -1,0 +1,98 @@
+﻿@model GestionEventiMagazzino.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Accesso";
+    Layout = null; // Mantiene la pagina completamente indipendente
+}
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accesso - Gestione Eventi Magazzino</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Collegamento al file CSS personalizzato -->
+    <link rel="stylesheet" href="~/css/personalizzazione.css" />
+
+    <style>
+            body {
+                min-height: 100vh;
+                margin: 0;
+            }
+
+            .login-card {
+                width: 100%;
+                max-width: 600px; /* Larghezza portata a 600px */
+                padding: 35px;
+                background: yellow;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            }
+
+            .login-title {
+                text-align: center;
+                margin-bottom: 25px;
+            }
+    </style>
+</head>
+<body class="sfondoLogin">
+    <!--w-100 ha permesso alla login card di allargarsi->
+    <!-- Incorpora il footer e il body in un unico div, mettendo l'img sotto il form -->
+    <div class="d-flex flex-column min-vh-100 justify-content-center align-items-center w-100 px-3">
+
+        <div class="login-card">
+            <div class="login-title">
+                <h3>Gestione Eventi</h3>
+                <p class="text-muted">Accedi al sistema</p>
+            </div>
+
+            <form asp-controller="Login" asp-action="Index" method="post">
+
+                <input type="hidden" asp-for="ReturnUrl" />
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label"></label>
+                    <input asp-for="Username"
+                           class="form-control"
+                           autocomplete="username"
+                           autofocus />
+                    <span asp-validation-for="Username"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password"
+                           type="password"
+                           class="form-control"
+                           autocomplete="current-password" />
+                    <span asp-validation-for="Password"
+                          class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-danger w-100">
+                    Accedi
+                </button>
+
+            </form>
+        </div>
+
+        <!-- Logo JUNIORSOFT -->
+        <footer class="text-center pb-3 mt-4">
+            <img src="~/images/sfondoJRgreen.jpeg" alt="Mia Immagine" width="300" height="100">
+        </footer>
+
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

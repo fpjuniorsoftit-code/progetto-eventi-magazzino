@@ -1,0 +1,121 @@
+﻿@model GestionEventiMagazzino.ViewModels.EventoCreateViewModel
+
+@{
+    ViewData["Title"] = "Nuovo evento";
+}
+<style>
+    .login-card {
+      
+        background: yellow;
+ 
+    }
+</style>
+
+<body class="sfondoAdmin">
+<div class="container mt-4">
+
+    <h2 class="mb-4">Creazione nuovo evento</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body login-card">
+
+            <form asp-controller="Events" asp-action="Create" method="post">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label"></label>
+                    <select asp-for="Username"
+                            asp-items="ViewBag.Utenti"
+                            class="form-select">
+                        <option value="">Seleziona un assegnatario</option>
+                    </select>
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="AltriOperatori" class="form-label"></label>
+                    <input asp-for="AltriOperatori"
+                         class="form-control"
+                         placeholder="esempio: Mario Rossi, Angela Bianchi"/>
+                    <span asp-validation-for="AltriOperatori" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Evento" class="form-label"></label>
+                    <textarea asp-for="Evento"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Descrizione dell'attività..."></textarea>
+                    <span asp-validation-for="Evento" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="DataEvento" class="form-label"></label>
+                        <input asp-for="DataEvento" type="date" class="form-control" />
+                        <span asp-validation-for="DataEvento" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="OraInizio" class="form-label"></label>
+                        <input asp-for="OraInizio" type="time" class="form-control" />
+                        <span asp-validation-for="OraInizio" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="OraFine" class="form-label"></label>
+                        <input asp-for="OraFine" type="time" class="form-control" />
+                        <span asp-validation-for="OraFine" class="text-danger"></span>
+                    </div>
+                </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Note" class="form-label"></label>
+                        <input asp-for="Note"
+                               class="form-control"
+                               placeholder="note visibili solo sul db" />
+                        <span asp-validation-for="Note" class="text-danger"></span>
+                    </div>
+
+                <div class="mb-4">
+                    <label asp-for="Stato" class="form-label"></label>
+                    <select asp-for="Stato"
+                            asp-items="ViewBag.Stati"
+                            class="form-select">
+                        <option value="">Seleziona uno stato</option>
+                    </select>
+                    <span asp-validation-for="Stato" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-danger">
+                        Crea evento
+                    </button>
+
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-secondary">
+                        Annulla
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+</body>
+
+<!-- Logo JUNIORSOFT -->
+<footer class="text-center pb-3 mt-4">
+    <img src="~/images/sfondoJRgreen.jpeg" alt="Mia Immagine" width="300" height="100">
+</footer>
+<!-- Bootstrap -->
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+<!-- Collegamento al file CSS personalizzato -->
+<link rel="stylesheet" href="~/css/personalizzazione.css" />
+
+<!--Se l'utente lascia un campo obbligatorio vuoto o scrive un'email non valida, la pagina mostra subito l'errore in rosso senza ricaricare la pagina e senza inviare dati inutili al server, migliorando drasticamente l'esperienza d'uso.-->
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

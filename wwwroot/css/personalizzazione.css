@@ -1,0 +1,54 @@
+﻿/* Definizione della classe per lo sfondo del Login */
+.sfondoLogin {
+    /* Il percorso parte dalla radice (/) ed entra in images */
+    background-image: url('/images/sfondoLogin.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh; /* Forza il contenitore a occupare tutta l'altezza dello schermo */
+    width: 100%;
+}
+
+/* Definizione della classe per lo sfondo dell'Admin */
+.sfondoAdmin {
+    /* Il percorso parte dalla radice (/) ed entra in images */
+    background-image: url('/images/sfondoAdmin.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh; /* Forza il contenitore a occupare tutta l'altezza dello schermo */
+    width: 100%;
+}
+
+/* CSS PER STATI*/
+.stato-sospeso {
+    color: #ffd800;
+    font-weight: bold;
+    font-size: 20px;
+}
+.stato-cancellato {
+    color: #808080;
+    font-weight: bold;
+    font-size: 20px;
+}
+.stato-chiuso {
+    color: #b6ff00;
+    font-weight: bold;
+    font-size: 20px;
+}
+.stato-in-corso{
+    color:#000000;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+/*CSS per RIGHE COLORATE IN BASE A RITARDO: la specifica di > td forza le celle a sovrascrivere il colore rosso o arancione sul colore bianco di default*/
+.riga-evento-passato > td {
+    background-color: #f8d7da !important;
+}
+
+.riga-evento-imminente > td {
+    background-color: #fff3cd !important;
+}
