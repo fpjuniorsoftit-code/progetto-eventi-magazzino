@@ -1,26 +1,5 @@
-﻿/* Definizione della classe per lo sfondo del Login */
-.sfondoLogin {
-    /* Il percorso parte dalla radice (/) ed entra in images */
-    background-image: url('/images/sfondoLogin.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    min-height: 100vh; /* Forza il contenitore a occupare tutta l'altezza dello schermo */
-    width: 100%;
-}
+﻿
 
-/* Definizione della classe per lo sfondo dell'Admin */
-.sfondoAdmin {
-    /* Il percorso parte dalla radice (/) ed entra in images */
-    background-image: url('/images/sfondoAdmin.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    min-height: 100vh; /* Forza il contenitore a occupare tutta l'altezza dello schermo */
-    width: 100%;
-}
 
 /* CSS PER STATI*/
 .stato-sospeso {

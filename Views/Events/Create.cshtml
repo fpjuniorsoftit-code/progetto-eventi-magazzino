@@ -3,119 +3,226 @@
 @{
     ViewData["Title"] = "Nuovo evento";
 }
-<style>
-    .login-card {
-      
-        background: yellow;
- 
-    }
-</style>
 
-<body class="sfondoAdmin">
-<div class="container mt-4">
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crea evento - Gestione Eventi Magazzino</title>
 
-    <h2 class="mb-4">Creazione nuovo evento</h2>
+    <!-- Foglio di stile locale di Bootstrap -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    <div class="card shadow-sm">
-        <div class="card-body login-card">
+    <style>
+            /* Palette verde e bianco ispirata alla barra superiore e al bordo inferiore del riferimento */
+            :root {
+                --verde-principale: #0e6b47;
+                --verde-scuro: #084c32;
+                --verde-sfondo: #eaf2ec;
+                --bordo-card: #cfe0d5;
+                --verde-bordo-basso: #6ca83b;
+            }
 
-            <form asp-controller="Events" asp-action="Create" method="post">
+            /* Imposta la struttura a colonna per mantenere il footer in fondo */
+            body.create-page {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+                margin: 0;
+                background-color: var(--verde-sfondo);
+                border-bottom: 8px solid var(--verde-bordo-basso);
+            }
 
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            /* Fascia superiore verde in stile barra di navigazione */
+            .top-header-bar {
+                background-color: var(--verde-principale);
+                color: #ffffff;
+                padding: 0.75rem 1.5rem;
+                border-bottom: 3px solid var(--verde-scuro);
+                flex-shrink: 0; /* Evita che l'header si schiacci */
+            }
 
-                <div class="mb-3">
-                    <label asp-for="Username" class="form-label"></label>
-                    <select asp-for="Username"
-                            asp-items="ViewBag.Utenti"
-                            class="form-select">
-                        <option value="">Seleziona un assegnatario</option>
-                    </select>
-                    <span asp-validation-for="Username" class="text-danger"></span>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="AltriOperatori" class="form-label"></label>
-                    <input asp-for="AltriOperatori"
-                         class="form-control"
-                         placeholder="esempio: Mario Rossi, Angela Bianchi"/>
-                    <span asp-validation-for="AltriOperatori" class="text-danger"></span>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Evento" class="form-label"></label>
-                    <textarea asp-for="Evento"
-                              class="form-control"
-                              rows="3"
-                              placeholder="Descrizione dell'attività..."></textarea>
-                    <span asp-validation-for="Evento" class="text-danger"></span>
-                </div>
+            .top-header-title {
+                font-size: 1rem;
+                font-weight: 700;
+                letter-spacing: 0.3px;
+                margin: 0;
+            }
 
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="DataEvento" class="form-label"></label>
-                        <input asp-for="DataEvento" type="date" class="form-control" />
-                        <span asp-validation-for="DataEvento" class="text-danger"></span>
-                    </div>
+            /* Card chiara con accento verde per il form di creazione evento */
+            .event-form-card {
+                background-color: #ffffff;
+                border: 1px solid var(--bordo-card);
+                border-top: 4px solid var(--verde-principale);
+                border-radius: 10px;
+                box-shadow: 0 6px 20px rgba(8, 76, 50, 0.08);
+            }
 
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="OraInizio" class="form-label"></label>
-                        <input asp-for="OraInizio" type="time" class="form-control" />
-                        <span asp-validation-for="OraInizio" class="text-danger"></span>
-                    </div>
+            .form-heading {
+                color: var(--verde-scuro);
+                font-weight: 700;
+            }
 
-                    <div class="col-md-4 mb-3">
-                        <label asp-for="OraFine" class="form-label"></label>
-                        <input asp-for="OraFine" type="time" class="form-control" />
-                        <span asp-validation-for="OraFine" class="text-danger"></span>
-                    </div>
-                </div>
+            .form-label {
+                font-weight: 600;
+            }
 
-                    <div class="mb-3">
-                        <label asp-for="Note" class="form-label"></label>
-                        <input asp-for="Note"
-                               class="form-control"
-                               placeholder="note visibili solo sul db" />
-                        <span asp-validation-for="Note" class="text-danger"></span>
-                    </div>
+            .form-control:focus,
+            .form-select:focus {
+                border-color: var(--verde-principale);
+                box-shadow: 0 0 0 0.2rem rgba(14, 107, 71, 0.18);
+            }
 
-                <div class="mb-4">
-                    <label asp-for="Stato" class="form-label"></label>
-                    <select asp-for="Stato"
-                            asp-items="ViewBag.Stati"
-                            class="form-select">
-                        <option value="">Seleziona uno stato</option>
-                    </select>
-                    <span asp-validation-for="Stato" class="text-danger"></span>
-                </div>
+            /* Pulsante principale verde per il salvataggio dell'evento */
+            .btn-submit-green {
+                background-color: var(--verde-principale);
+                border-color: var(--verde-principale);
+                color: #ffffff;
+                font-weight: 600;
+            }
 
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-danger">
-                        Crea evento
-                    </button>
+                .btn-submit-green:hover,
+                .btn-submit-green:focus {
+                    background-color: var(--verde-scuro);
+                    border-color: var(--verde-scuro);
+                    color: #ffffff;
+                }
+    </style>
+</head>
+<body class="create-page">
 
-                    <a asp-controller="Home"
-                       asp-action="Index"
-                       class="btn btn-secondary">
-                        Annulla
-                    </a>
-                </div>
-
-            </form>
-
+    <!-- Barra superiore verde coerente con il design di riferimento -->
+    <header class="top-header-bar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <span class="top-header-title">Gestione Eventi Magazzino — Amministrazione</span>
+            <a asp-controller="Admin" asp-action="Index" class="btn btn-sm btn-outline-light">
+                Pannello admin
+            </a>
         </div>
-    </div>
-</div>
+    </header>
+
+    <main class="container d-flex flex-column flex-grow-1 justify-content-center my-4 my-md-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-9 col-xl-8">
+
+                <div class="card event-form-card">
+                    <div class="card-body p-4">
+
+                        <h2 class="form-heading mb-4 text-center">Creazione nuovo evento</h2>
+
+                        <!-- Form principale per la creazione di un nuovo evento -->
+                        <form asp-controller="Events" asp-action="Create" method="post">
+
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <!-- Assegnatario principale e altri operatori affiancati -->
+                            <div class="row">
+                                <div class="col-sm-6 mb-3">
+                                    <label asp-for="Username" class="form-label"></label>
+                                    <select asp-for="Username"
+                                            asp-items="ViewBag.Utenti"
+                                            class="form-select">
+                                        <option value="">Seleziona un assegnatario</option>
+                                    </select>
+                                    <span asp-validation-for="Username" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-sm-6 mb-3">
+                                    <label asp-for="AltriOperatori" class="form-label"></label>
+                                    <input asp-for="AltriOperatori"
+                                           class="form-control"
+                                           placeholder="esempio: Mario Rossi, Angela Bianchi" />
+                                    <span asp-validation-for="AltriOperatori" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Descrizione dell'evento a larghezza piena per maggiore leggibilità -->
+                            <div class="mb-3">
+                                <label asp-for="Evento" class="form-label"></label>
+                                <textarea asp-for="Evento"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="Descrizione dell'attività..."></textarea>
+                                <span asp-validation-for="Evento" class="text-danger"></span>
+                            </div>
+
+                            <!-- Pianificazione temporale: data, ora inizio e ora fine -->
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="DataEvento" class="form-label"></label>
+                                    <input asp-for="DataEvento" type="date" class="form-control" />
+                                    <span asp-validation-for="DataEvento" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="OraInizio" class="form-label"></label>
+                                    <input asp-for="OraInizio" type="time" class="form-control" />
+                                    <span asp-validation-for="OraInizio" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="OraFine" class="form-label"></label>
+                                    <input asp-for="OraFine" type="time" class="form-control" />
+                                    <span asp-validation-for="OraFine" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Note interne e stato dell'evento -->
+                            <div class="row">
+                                <div class="col-md-7 mb-3">
+                                    <label asp-for="Note" class="form-label"></label>
+                                    <input asp-for="Note"
+                                           class="form-control"
+                                           placeholder="note visibili solo sul db" />
+                                    <span asp-validation-for="Note" class="text-danger"></span>
+                                </div>
+
+                                <div class="col-md-5 mb-4">
+                                    <label asp-for="Stato" class="form-label"></label>
+                                    <select asp-for="Stato"
+                                            asp-items="ViewBag.Stati"
+                                            class="form-select">
+                                        <option value="">Seleziona uno stato</option>
+                                    </select>
+                                    <span asp-validation-for="Stato" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <!-- Azioni principali e navigazione verso la dashboard -->
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 pt-3 border-top">
+                                <a asp-controller="Home"
+                                   asp-action="Index"
+                                   class="btn btn-outline-secondary">
+                                    Annulla - Vai alla dashboard
+                                </a>
+
+                                <button type="submit" class="btn btn-submit-green px-4">
+                                    Crea evento
+                                </button>
+                            </div>
+
+                        </form>
+                        <!-- Fine form principale -->
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Logo JUNIORSOFT posizionato sotto la card -->
+        <footer class="text-center pb-3 mt-4">
+            <img src="~/images/sfondoJRgreen.jpeg"
+                 alt="Logo JUNIORSOFT"
+                 class="img-fluid"
+                 style="max-width: 260px; height: auto;" />
+        </footer>
+    </main>
+
+    <!-- Ordine richiesto: jQuery -> jQuery Validate -> Unobtrusive Validation -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
 </body>
-
-<!-- Logo JUNIORSOFT -->
-<footer class="text-center pb-3 mt-4">
-    <img src="~/images/sfondoJRgreen.jpeg" alt="Mia Immagine" width="300" height="100">
-</footer>
-<!-- Bootstrap -->
-<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-<!-- Collegamento al file CSS personalizzato -->
-<link rel="stylesheet" href="~/css/personalizzazione.css" />
-
-<!--Se l'utente lascia un campo obbligatorio vuoto o scrive un'email non valida, la pagina mostra subito l'errore in rosso senza ricaricare la pagina e senza inviare dati inutili al server, migliorando drasticamente l'esperienza d'uso.-->
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+</html>

@@ -23,6 +23,17 @@ namespace GestionEventiMagazzino.Controllers
             return View();
         }
 
+
+
+        //ricerca utenti per il pannello amministratore(collabora con user service)
+        [HttpGet]
+        public async Task<IActionResult> Search(string term)
+        {
+            var usernames = await userService.SearchUsernamesAsync(term ?? ""); //richiamo il metodo in userservice
+
+            return Json(usernames);
+        }
+
         // Creazione utente
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -134,5 +145,6 @@ namespace GestionEventiMagazzino.Controllers
             TempData["Successo"] = "Utente disattivato correttamente.";
             return RedirectToAction("Index" ,"Admin"); //dopo la cancellazione riporta al pannello admin
         }
-    }
+    } 
 }
+

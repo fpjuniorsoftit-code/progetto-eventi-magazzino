@@ -27,6 +27,28 @@ namespace GestionEventiMagazzino.Services
                 .Select(u => u.username)
                 .ToListAsync();
         }
+
+        //Cerca gli utenti attivi per username(serve in pannello admin per avere barra di ricerca anzichè lista completa utenti)
+        public async Task<List<string>> SearchUsernamesAsync(string ricerca)
+        {
+            ricerca = ricerca.Trim(); //elimina spazi vuoti
+
+            if (ricerca.Length < 2)
+                return new List<string>();
+
+            return await context.Users
+                  .AsNoTracking()
+                    .Where(u => !u.isDeactivated &&
+                                u.username.Contains(ricerca)) //esclude utenti disattivati
+                    .OrderBy(u => u.username)
+                    .Select(u => u.username)
+                    .Take(10)//restituisci massimo 10 risultati
+                    .ToListAsync();
+
+        }
+
+
+
         // Recupera un utente(ed i suoi dati) tramite username
         public async Task<User?> GetUserByUsernameAsync(string username)
         {

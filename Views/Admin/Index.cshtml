@@ -10,105 +10,374 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pannello amministratore</title>
+    <title>Pannello amministratore - Gestione Eventi Magazzino</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <!-- Collegamento al file CSS personalizzato per lo sfondo admin -->
-    <link rel="stylesheet" href="~/css/personalizzazione.css" />
+
+    <style>
+            /* Palette verde e bianco coerente con il resto dell'applicazione */
+            :root {
+                --verde-principale: #0e6b47;
+                --verde-scuro: #084c32;
+                --verde-sfondo: #eaf2ec;
+                --bordo-card: #cfe0d5;
+                --verde-bordo-basso: #6ca83b;
+            }
+
+            body.pannello-admin-page {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+                margin: 0;
+                background-color: var(--verde-sfondo);
+                border-bottom: 8px solid var(--verde-bordo-basso);
+            }
+
+            /* Menu laterale fisso su desktop con palette verde scuro */
+            .sidebar {
+                width: 250px;
+                min-height: 100vh;
+                background-color: var(--verde-scuro);
+                color: #ffffff;
+                position: fixed;
+                top: 0;
+                left: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                padding: 20px 16px;
+                z-index: 100;
+            }
+
+            .sidebar-brand {
+                font-size: 1.05rem;
+                font-weight: 700;
+                padding-bottom: 14px;
+                margin-bottom: 16px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+            }
+
+            .sidebar-menu {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            /* Stile uniforme per voci link e riga Logout */
+            .sidebar-link {
+                display: block;
+                color: #eaf2ec;
+                text-decoration: none;
+                padding: 10px 12px;
+                border-radius: 6px;
+                font-weight: 500;
+                transition: background-color 0.15s ease, color 0.15s ease;
+            }
+
+                .sidebar-link:hover,
+                .sidebar-link:focus {
+                    background-color: var(--verde-principale);
+                    color: #ffffff;
+                }
+
+            .sidebar-info {
+                font-size: 0.8rem;
+                color: rgba(255, 255, 255, 0.72);
+                padding-top: 12px;
+                border-top: 1px solid rgba(255, 255, 255, 0.18);
+            }
+
+            /* Sposta il contenuto a destra della sidebar su schermi medio-grandi */
+            .main-content {
+                margin-left: 250px;
+                flex: 1 0 auto;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .page-title {
+                color: var(--verde-scuro);
+                font-weight: 700;
+            }
+
+            .action-card {
+                background-color: #fff;
+                border: 1px solid var(--bordo-card);
+                border-top: 4px solid var(--verde-principale);
+                border-radius: 10px;
+                padding: 18px;
+                width: 260px;
+                box-shadow: 0 6px 20px rgba(8, 76, 50, 0.08);
+            }
+
+            .btn-verde {
+                background-color: var(--verde-principale);
+                border-color: var(--verde-principale);
+                color: #ffffff;
+                font-weight: 600;
+            }
+
+                .btn-verde:hover,
+                .btn-verde:focus {
+                    background-color: var(--verde-scuro);
+                    border-color: var(--verde-scuro);
+                    color: #ffffff;
+                }
+
+            /* Su schermi piccoli la sidebar torna nel flusso normale in alto */
+            @@media (max-width: 767.98px) {
+                .sidebar {
+                    position: static;
+                    width: 100%;
+                    min-height: auto;
+                }
+
+                .main-content {
+                    margin-left: 0;
+                }
+            }
+    </style>
 </head>
-<body class="sfondoAdmin">
+<body class="pannello-admin-page">
 
-    <!-- Contenitore principale a tutta altezza con flex per spingere il footer in basso -->
-    <div class="d-flex flex-column min-vh-100 w-100 justify-content-between align-items-center py-4">
+    <!-- Menu laterale di navigazione rapida -->
+    <aside class="sidebar">
+        <div>
+            <div class="sidebar-brand">Menù rapido</div>
+            <ul class="sidebar-menu">
+                <li>
+                    <a asp-controller="Home" asp-action="Index" class="sidebar-link">
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Users" asp-action="Create" class="sidebar-link">
+                        Crea utente
+                    </a>
+                </li>
+                @* Riga cliccabile tipo link che invia il Logout in POST senza usare un <button> *@
+                <li>
+                    <form asp-controller="Login" asp-action="Logout" method="post" class="m-0">
+                        <a href="#"
+                           class="sidebar-link"
+                           onclick="this.closest('form').submit(); return false;">
+                            Logout
+                        </a>
+                    </form>
+                </li>
+            </ul>
+        </div>
 
-        <div class="container mt-4 text-center">
-            <h2 class="mb-5 text-white">Pannello amministratore</h2>
+        <div class="sidebar-info">
+            Gestione Eventi Magazzino<br />
+            Area Amministrazione
+        </div>
+    </aside>
 
-            <!-- 1. PRIMA RIGA: Immagini e bottoni per Creazione Utenti e Dashboard -->
-            <div class="row justify-content-center g-4 mb-4">
+    <!-- Area principale con azioni amministrative e footer -->
+    <div class="main-content py-4 px-3">
+        <div class="container text-center my-2">
+            <h2 class="page-title mb-4">Pannello amministratore</h2>
 
-                <!-- Colonna: Creazione Utenti -->
-                <div class="col-auto d-flex flex-column align-items-center">
-                    <img src="~/images/CreazioneUtentiBottone.png" alt="Creazione Utenti" class="rounded shadow-sm mb-3" style="width: 250px; height: 200px; object-fit: cover;" />
-                    <a asp-controller="Users" asp-action="Create" class="btn btn-danger btn-lg w-100">
+            <!-- 1. PRIMA RIGA: Creazione Utenti e Dashboard -->
+            <div class="d-flex flex-wrap justify-content-center gap-4 mb-4">
+
+                <div class="action-card d-flex flex-column align-items-center">
+                    <img src="~/images/CreazioneUtentiBottone.png"
+                         alt="Creazione Utenti"
+                         class="rounded mb-3"
+                         style="width: 220px; height: 170px; object-fit: cover;" />
+                    <a asp-controller="Users" asp-action="Create" class="btn btn-verde w-100">
                         Creazione nuovi utenti
                     </a>
                 </div>
 
-                <!-- Colonna: Dashboard -->
-                <div class="col-auto d-flex flex-column align-items-center">
-                    <img src="~/images/fotoPerBottoneDashboard.png" alt="Dashboard" class="rounded shadow-sm mb-3" style="width: 250px; height: 200px; object-fit: cover;" />
-                    <a asp-controller="Home" asp-action="Index" class="btn btn-danger btn-lg w-100">
+                <div class="action-card d-flex flex-column align-items-center">
+                    <img src="~/images/fotoPerBottoneDashboard.png"
+                         alt="Dashboard"
+                         class="rounded mb-3"
+                         style="width: 220px; height: 170px; object-fit: cover;" />
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-verde w-100">
                         Visualizza dashboard
                     </a>
                 </div>
 
             </div>
 
-            <!-- 2. SECONDA RIGA: Sezione Modifica ed Eliminazione utenti affiancate -->
-            <div class="row justify-content-center g-4">
+            <!-- 2. SECONDA RIGA: Modifica ed Eliminazione utenti con ricerca -->
+            <div class="d-flex flex-wrap justify-content-center gap-4">
 
-                <!-- Colonna: Modifica utente -->
-                <div class="col-auto d-flex flex-column align-items-center" style="width: 250px;">
+                <!-- Modifica utente con barra di ricerca -->
+                <div class="action-card d-flex flex-column align-items-center">
                     <form asp-controller="Users" asp-action="Update" method="get" class="w-100">
-                        <select name="username" class="form-select mb-2" required>
-                            <option value="">Seleziona un operatore...</option>
-                            @foreach (var username in Model)
-                            {
-                                <option value="@username">@username</option>
-                            }
-                        </select>
-                        <button type="submit" class="btn btn-danger btn-lg w-100">
+                        <div class="position-relative mb-2">
+                            <input type="text"
+                                   id="ricercaModifica"
+                                   class="form-control"
+                                   placeholder="Cerca operatore..."
+                                   autocomplete="off" />
+
+                            <div id="risultatiModifica"
+                                 class="list-group position-absolute w-100 shadow-sm"
+                                 style="z-index: 200; display: none;">
+                            </div>
+                        </div>
+
+                        <!-- Campo nascosto valorizzato solo quando l'utente clicca un risultato valido -->
+                        <input type="hidden" name="username" id="usernameModifica" />
+
+                        <button type="submit"
+                                class="btn btn-verde w-100"
+                                disabled
+                                id="btnModifica">
                             Modifica utente
                         </button>
                     </form>
                 </div>
 
-                <!-- Colonna: Eliminazione utente -->
-                <div class="col-auto d-flex flex-column align-items-center" style="width: 250px;">
+                <!-- Eliminazione utente con barra di ricerca -->
+                <div class="action-card d-flex flex-column align-items-center">
+                    <form asp-controller="Users"
+                          asp-action="Delete"
+                          method="post"
+                          class="w-100"
+                          onsubmit="return confirm('ATTENZIONE: NON E\\' POSSIBILE ELIMINARE IL TUO STESSO ACCOUNT. SICURO DI VOLER ELIMINARE L\\'UTENTE?');">
 
+                        @Html.AntiForgeryToken()
 
-                    <form asp-controller="Users" 
-                    asp-action="Delete" 
-                    method="post" 
-                    class="w-100"
-                    onsubmit="return confirm('ATTENZIONE: NON E\' POSSIBILE ELIMINARE IL TUO STESSO ACCOUNT. SICURO DI VOLER ELIMINARE L\'UTENTE?');"> <!--mettere \ davanti l'apice piccolo evita di creare conflitti con javascript che interpeta l'apice singolo come apertura-chiusura della stringa->
-                        @Html.AntiForgeryToken() <!--protegge il form da attacchi-->
+                        <div class="position-relative mb-2">
+                            <input type="text"
+                                   id="ricercaElimina"
+                                   class="form-control"
+                                   placeholder="Cerca un operatore..."
+                                   autocomplete="off" />
 
+                            <div id="risultatiElimina"
+                                 class="list-group position-absolute w-100 shadow-sm"
+                                 style="z-index: 200; display: none;">
+                            </div>
+                        </div>
 
-                        
-                    <select name="username" class="form-select mb-2" required>
-                            <option value="">Seleziona un operatore...</option>
-                            @foreach (var username in Model)
-                            {
-                                <option value="@username">@username</option>
-                            }
-                        </select>
-                        <button type="submit" class="btn btn-danger btn-lg w-100">
+                        <!-- Campo nascosto valorizzato solo quando l'utente clicca un risultato valido -->
+                        <input type="hidden" name="username" id="usernameElimina" />
+
+                        <button type="submit"
+                                class="btn btn-outline-danger w-100 fw-semibold"
+                                disabled
+                                id="btnElimina">
                             Elimina utente
                         </button>
                     </form>
                 </div>
 
             </div>
-
         </div>
 
-        <!-- 3. FOOTER E LOGOUT: Raggruppati in basso al centro -->
-        <div class="text-center pt-4">
-            <div class="mb-3">
-                <form asp-controller="Login" asp-action="Logout" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-danger btn-lg px-4">
-                        Logout
-                    </button>
-                </form>
-            </div>
-            <footer>
-                <img src="~/images/sfondoJRgreen.jpeg" alt="Logo Aziendale" width="300" height="100">
-            </footer>
-        </div>
-
+        <footer class="text-center pt-4">
+            <img src="~/images/sfondoJRgreen.jpeg"
+                 alt="Logo JUNIORSOFT"
+                 class="img-fluid"
+                 style="max-width: 260px; height: auto;" />
+        </footer>
     </div>
+
+    <!-- FUNZIONE CHE RECUPERA USERNAME QUANDO SI DIGITANO ALMENO 2 CARATTERI IN MODIFICA O ELIMINA -->
+    <script>
+            function inizializzaRicerca(inputId, risultatiId, usernameId, pulsanteId) {
+                const input = document.getElementById(inputId);             // ID del campo di testo in cui si digita
+                const risultati = document.getElementById(risultatiId);     // ID del contenitore dei suggerimenti
+                const username = document.getElementById(usernameId);       // ID del campo nascosto con lo username selezionato
+                const pulsante = document.getElementById(pulsanteId);       // ID del pulsante Modifica o Elimina
+
+                // Esce in sicurezza se uno degli elementi non è presente nella pagina
+                if (!input || !risultati || !username || !pulsante) {
+                    return;
+                }
+
+                let timeout; // Evita di interrogare il server ad ogni singola lettera digitata senza pausa
+
+                input.addEventListener("input", function () {
+                    clearTimeout(timeout); // Annulla eventuale timer precedente ancora in attesa
+
+                    // Resetta selezione e pulsante se il testo cambia, evitando di operare su un utente precedente
+                    username.value = "";
+                    pulsante.disabled = true;
+                    risultati.innerHTML = "";
+                    risultati.style.display = "none";
+
+                    const termine = input.value.trim(); // Recupera il testo digitato senza spazi superflui
+                    if (termine.length < 2) {
+                        return; // Avvia la ricerca solo da 2 caratteri in su
+                    }
+
+                    // Attende 250ms dopo l'ultima digitazione prima di chiamare l'endpoint sul server
+                    timeout = setTimeout(async function () {
+                        try {
+                            // Richiesta al server con parametro codificato in modo sicuro per l'URL
+                            const response = await fetch(
+                                `/Users/Search?term=${encodeURIComponent(termine)}`
+                            );
+
+                            if (!response.ok) {
+                                throw new Error("Errore durante la ricerca.");
+                            }
+
+                            const utenti = await response.json(); // Converte la risposta JSON in array/oggetto JS
+                            risultati.innerHTML = "";
+
+                            if (!Array.isArray(utenti) || utenti.length === 0) {
+                                risultati.style.display = "none";
+                                return;
+                            }
+
+                            // Crea un elemento cliccabile per ciascuno username restituito dal DB
+                            utenti.forEach(function (utente) {
+                                const elemento = document.createElement("button");
+                                elemento.type = "button";
+                                elemento.className = "list-group-item list-group-item-action";
+                                elemento.textContent = utente;
+
+                                // Quando si seleziona un utente esistente, valorizza i campi e abilita il pulsante
+                                elemento.addEventListener("click", function () {
+                                    input.value = utente;
+                                    username.value = utente;
+                                    pulsante.disabled = false;
+                                    risultati.style.display = "none";
+                                });
+
+                                risultati.appendChild(elemento);
+                            });
+
+                            risultati.style.display = "block";
+                        } catch (errore) {
+                            // Nasconde i suggerimenti in caso di errore di rete o server
+                            console.error(errore);
+                            risultati.innerHTML = "";
+                            risultati.style.display = "none";
+                        }
+                    }, 250);
+                });
+            }
+
+            // Inizializza la ricerca per entrambi i box del pannello admin: richiama quindi la funzione
+            inizializzaRicerca(
+                "ricercaModifica",
+                "risultatiModifica",
+                "usernameModifica",
+                "btnModifica"
+            );
+
+            inizializzaRicerca(
+                "ricercaElimina",
+                "risultatiElimina",
+                "usernameElimina",
+                "btnElimina"
+            );
+    </script>
 
 </body>
 </html>
