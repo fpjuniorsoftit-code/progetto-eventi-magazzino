@@ -6,21 +6,26 @@
     color: #ffd800;
     font-weight: bold;
     font-size: 20px;
+    text-shadow: -1px -1px 0 #084c32, 1px -1px 0 #084c32, -1px 1px 0 #084c32, 1px 1px 0 #084c32; /*da un contorno per migliorare visibilità*/
 }
+
 .stato-cancellato {
     color: #808080;
     font-weight: bold;
     font-size: 20px;
+    text-shadow: -1px -1px 0 #084c32, 1px -1px 0 #084c32, -1px 1px 0 #084c32, 1px 1px 0 #084c32; /*da un contorno per migliorare visibilità*/
 }
 .stato-chiuso {
     color: #b6ff00;
     font-weight: bold;
     font-size: 20px;
+    text-shadow: -1px -1px 0 #084c32, 1px -1px 0 #084c32, -1px 1px 0 #084c32, 1px 1px 0 #084c32; /*da un contorno per migliorare visibilità*/
 }
-.stato-in-corso{
-    color:#000000;
+.stato-in-corso {
+    color: #000000;
     font-weight: bold;
     font-size: 20px;
+    text-shadow: -1px -1px 0 #084c32, 1px -1px 0 #084c32, -1px 1px 0 #084c32, 1px 1px 0 #084c32; /*da un contorno per migliorare visibilità*/
 }
 
 /*CSS per RIGHE COLORATE IN BASE A RITARDO: la specifica di > td forza le celle a sovrascrivere il colore rosso o arancione sul colore bianco di default*/
