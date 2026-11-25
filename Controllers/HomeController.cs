@@ -3,12 +3,10 @@ using GestionEventiMagazzino.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Diagnostics;
 
 namespace GestionEventiMagazzino.Controllers
 {
-    [Authorize] //solo gli utenti utenticati vedranno la home page
+    [Authorize] // Solo gli utenti autenticati possono accedere alla dashboard
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext context;
@@ -17,12 +15,15 @@ namespace GestionEventiMagazzino.Controllers
         {
             this.context = context;
         }
-        public async Task<IActionResult> Index(DateOnly? data, string? stato, string username)
+
+        public async Task<IActionResult> Index(DateOnly? data, string? stato, string? username, int page = 1, int pageSize = 20)
         {
             DateOnly oggi = DateOnly.FromDateTime(DateTime.Today);
-            DateOnly ieri = oggi.AddDays(-1); //ADD days permette di mettere o togliere giorni alla data odierna.
+            DateOnly ieri = oggi.AddDays(-1);
             DateOnly limite = oggi.AddDays(5);
 
+            // Dimensione pagina sicura (almeno 1 elemento)
+            int dimensionePagina = Math.Max(1, pageSize);
 
             var query = context.Events
                 .AsNoTracking()
@@ -30,55 +31,68 @@ namespace GestionEventiMagazzino.Controllers
                 .Include(e => e.utente)
                 .AsQueryable();
 
-            // Se non è stata scelta una data e non c'è uno stato,
-        
-            if (data == null && string.IsNullOrWhiteSpace(stato)
-                && string.IsNullOrWhiteSpace(username)) //questa if dice che se non c'è filtro stato o operatore mette la dashboard dei prossimi 5 giorni con ieri e oggi anche quindi 7gg totali.
+            // Senza filtri attivi mostra la finestra standard: ieri, oggi e prossimi 5 giorni (7 giorni totali)
+            if (data == null && string.IsNullOrWhiteSpace(stato) && string.IsNullOrWhiteSpace(username))
             {
                 query = query.Where(e => e.dataEvento >= ieri && e.dataEvento <= limite);
             }
 
-            // Se è stata scelta una data, applico il filtro.
+            // Applica il filtro per data se impostato
             if (data != null)
             {
                 query = query.Where(e => e.dataEvento == data.Value);
             }
 
-            // Se è stato scelto uno stato, applico anche questo filtro.
+            // Applica il filtro per stato se impostato
             if (!string.IsNullOrWhiteSpace(stato))
             {
                 query = query.Where(e => e.stato == stato);
             }
-            //se è stato scelto uno username applico anche questo filtro
+
+            // Applica il filtro per operatore se impostato
             if (!string.IsNullOrWhiteSpace(username))
             {
                 query = query.Where(e => e.username == username);
             }
 
-            //consente di visualizzare gli username disponibili per il filtro nella view
-            ViewBag.Utenti = await context.Users
-            .AsNoTracking()
-            .OrderBy(u => u.username)
-            .Select(u => u.username)
-            .ToListAsync();
+            // Calcola il totale degli eventi filtrati e il numero complessivo di pagine (almeno 1)
+            int totaleEventi = await query.CountAsync();
+            int totalPages = Math.Max(1, (int)Math.Ceiling(totaleEventi / (double)dimensionePagina));
+            int paginaCorrente = Math.Clamp(page, 1, totalPages);
 
-            var eventi = await query
-                .OrderBy(e => e.oraInizio)
+            // Recupera solo gli eventi della pagina richiesta con ordinamento stabile
+            var eventiPagina = await query
+                .OrderBy(e => e.dataEvento)
+                .ThenBy(e => e.oraInizio)
+                .ThenBy(e => e.eventoID)
+                .Skip((paginaCorrente - 1) * dimensionePagina)
+                .Take(dimensionePagina)
                 .ToListAsync();
 
-            // Memorizzo i filtri attivi per comunicarli alla View.
-            ViewBag.DataFiltro = data?.ToString("yyyy-MM-dd");//la viewbag conterrà la data selezionata
-            ViewBag.StatoFiltro = stato; //la viewbag conterrà lo stato selezionato
-            ViewBag.UsernameFiltro = username; //la viewbag serve per passare dati dal controller alla view. in questo caso serve a tenere i filtri attivi caricati dopo la ricerca.
+            // Elenco username per il modale di filtro operatore
+            ViewBag.Utenti = await context.Users
+                .AsNoTracking()
+                .OrderBy(u => u.username)
+                .Select(u => u.username)
+                .ToListAsync();
 
-            //se la richiesta arriva da javascript restituisco solo le righe degli eventi
+            // Mantiene i filtri attivi nella vista
+            ViewBag.DataFiltro = data?.ToString("yyyy-MM-dd");
+            ViewBag.StatoFiltro = stato;
+            ViewBag.UsernameFiltro = username;
+
+            // Passa i dati di paginazione a Index e _RigheEventi
+            ViewBag.CurrentPage = paginaCorrente;
+            ViewBag.TotalPages = totalPages;
+
+            // Se la richiesta arriva via fetch/AJAX, restituisce solo le righe parziali
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                return PartialView("_RigheEventi", eventi);
+                return PartialView("_RigheEventi", eventiPagina);
             }
 
-            // Altrimenti restituisco la dashboard completa
-            return View(eventi);
+            // Altrimenti restituisce la pagina completa della dashboard
+            return View(eventiPagina);
         }
     }
 }

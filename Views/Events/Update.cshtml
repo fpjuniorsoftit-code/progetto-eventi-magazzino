@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
     <style>
-            /* Palette ispirata al sito */
+            /* Palette verde e bianco coerente con il resto dell'applicazione */
             :root {
                 --verde-principale: #0e6b47;
                 --verde-scuro: #084c32;
@@ -26,7 +26,7 @@
                 --bordo-card: #cfe0d5;
             }
 
-            /* Layout a colonna per tenere il footer in fondo senza creare scorrimenti superflui */
+            /* Layout a colonna per tenere il footer in fondo */
             body.update-page {
                 display: flex;
                 flex-direction: column;
@@ -36,7 +36,7 @@
                 border-bottom: 8px solid var(--verde-bordo-basso);
             }
 
-            /* Fascia superiore verde coerente con il tema */
+            /* Fascia superiore verde */
             .top-header-bar {
                 background-color: var(--verde-principale);
                 color: #ffffff;
@@ -52,12 +52,12 @@
                 margin: 0;
             }
 
-            /* Card ampia e bilanciata per evitare un form troppo stretto e alto */
+            /* Card ampia e bilanciata per il form di modifica */
             .update-card {
                 width: 100%;
                 max-width: 720px;
                 padding: 32px;
-                background-color: #fff;
+                background-color: #ffffff;
                 border: 1px solid var(--bordo-card);
                 border-radius: 10px;
                 border-top: 4px solid var(--verde-principale);
@@ -118,26 +118,42 @@
                 <h2>Modifica evento</h2>
             </div>
 
-            <!-- Richiama il metodo Update che c'è dentro il controller -->
-            <form asp-action="Update" method="post">
+            <!-- Invia i dati modificati all'azione Update del controller Events -->
+            <form asp-controller="Events" asp-action="Update" method="post">
 
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                <!-- Assegnatario e altri operatori affiancati da schermo medio in su -->
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Username" class="form-label"></label>
-                        <select asp-for="Username" asp-items="ViewBag.Utenti" class="form-select">
-                            <option value="">Seleziona un assegnatario</option>
-                        </select>
-                        <span asp-validation-for="Username" class="text-danger"></span>
+            
+
+                <!-- Operatore assegnatario con ricerca live collegata allo script -->
+                <div class="mb-3">
+                    <label class="form-label" for="ricercaUtente">Operatore assegnatario</label>
+                    <div class="position-relative">
+                        <!-- Precompilato con lo username già assegnato all'evento -->
+                        <input type="text"
+                               id="ricercaUtente"
+                               class="form-control"
+                               value="@Model?.Username"
+                               placeholder="Cerca operatore..."
+                               autocomplete="off" />
+
+                        <!-- Contenitore dei suggerimenti restituiti dal server -->
+                        <div id="risultatiRicerca"
+                             class="list-group position-absolute w-100 shadow-sm"
+                             style="z-index: 200; display: none;">
+                        </div>
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="AltriOperatori" class="form-label"></label>
-                        <input asp-for="AltriOperatori" class="form-control" />
-                        <span asp-validation-for="AltriOperatori" class="text-danger"></span>
-                    </div>
+                    <!-- Campo nascosto collegato al modello per il POST -->
+                    <input type="hidden" asp-for="Username" id="usernameRicerca" />
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
+
+                <!-- Altri operatori coinvolti -->
+                <div class="mb-3">
+                    <label asp-for="AltriOperatori" class="form-label"></label>
+                    <input asp-for="AltriOperatori" class="form-control" />
+                    <span asp-validation-for="AltriOperatori" class="text-danger"></span>
                 </div>
 
                 <!-- Pianificazione temporale: data, ora inizio e ora fine -->
@@ -161,6 +177,7 @@
                     </div>
                 </div>
 
+                <!-- Descrizione dell'evento -->
                 <div class="mb-3">
                     <label asp-for="Evento" class="form-label"></label>
                     <textarea asp-for="Evento" class="form-control" rows="3"></textarea>
@@ -186,6 +203,7 @@
                     </div>
                 </div>
 
+                <!-- Azioni di annullamento e salvataggio -->
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pt-3 border-top">
                     <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
                         Annulla
@@ -201,7 +219,7 @@
 
         <!-- Logo JUNIORSOFT posizionato sotto la card -->
         <footer class="text-center pb-3 mt-4">
-            <img src="~/images/sfondoJRgreen.jpeg"
+            <img src="~/images/logoJR.png"
                  alt="Logo JUNIORSOFT"
                  class="img-fluid"
                  style="max-width: 260px; height: auto;" />
@@ -213,6 +231,99 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+    <!-- Ricerca asincrona dell'operatore a partire da almeno 2 caratteri -->
+    <script>
+            function inizializzaRicerca(inputId, risultatiId, usernameId) {
+                const input = document.getElementById(inputId);
+                const risultati = document.getElementById(risultatiId);
+                const username = document.getElementById(usernameId);
+
+                // Esce se manca un elemento necessario
+                if (!input || !risultati || !username) {
+                    return;
+                }
+
+                let timeout;
+
+                input.addEventListener("input", function () {
+                    // Annulla l'eventuale ricerca ancora in attesa
+                    clearTimeout(timeout);
+
+                    // Azzera l'operatore selezionato se il testo cambia
+                    username.value = "";
+                    risultati.innerHTML = "";
+                    risultati.style.display = "none";
+
+                    const termine = input.value.trim();
+
+                    // Avvia la ricerca solo da 2 caratteri in su
+                    if (termine.length < 2) {
+                        return;
+                    }
+
+                    // Attende 250 ms dall'ultima digitazione prima di interrogare il server
+                    timeout = setTimeout(async function () {
+                        try {
+                            const urlRicerca = '@Url.Action("Search", "Users")';
+
+                            // Richiede al server gli username corrispondenti
+                            const response = await fetch(
+                                `${urlRicerca}?term=${encodeURIComponent(termine)}`
+                            );
+
+                            if (!response.ok) {
+                                throw new Error("Errore durante la ricerca.");
+                            }
+
+                            const utenti = await response.json();
+
+                            // Ignora la risposta se nel frattempo il testo è cambiato
+                            if (input.value.trim() !== termine) {
+                                return;
+                            }
+
+                            risultati.innerHTML = "";
+
+                            if (!Array.isArray(utenti) || utenti.length === 0) {
+                                risultati.style.display = "none";
+                                return;
+                            }
+
+                            // Crea un suggerimento cliccabile per ogni username trovato
+                            utenti.forEach(function (utente) {
+                                const elemento = document.createElement("button");
+                                elemento.type = "button";
+                                elemento.className = "list-group-item list-group-item-action";
+                                elemento.textContent = utente;
+
+                                // Seleziona l'operatore e valorizza il campo inviato dal form
+                                elemento.addEventListener("click", function () {
+                                    input.value = utente;
+                                    username.value = utente;
+                                    risultati.style.display = "none";
+                                });
+
+                                risultati.appendChild(elemento);
+                            });
+
+                            risultati.style.display = "block";
+                        } catch (errore) {
+                            console.error(errore);
+                            risultati.innerHTML = "";
+                            risultati.style.display = "none";
+                        }
+                    }, 250);
+                });
+            }
+
+            // Attiva la ricerca nella pagina di modifica evento
+            inizializzaRicerca(
+                "ricercaUtente",
+                "risultatiRicerca",
+                "usernameRicerca"
+            );
+    </script>
 
 </body>
 </html>

@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Home";
     Layout = null; // Pagina autonoma senza layout condiviso
+    var totalePagineIniziale = Math.Max(1, ViewBag.TotalPages as int? ?? 1);
+    var paginaIniziale = Math.Max(1, ViewBag.CurrentPage as int? ?? 1);
 }
 
 <!DOCTYPE html>
@@ -71,6 +73,17 @@
             .dashboard-subtitle {
                 color: var(--verde-scuro);
                 font-weight: 700;
+            }
+
+            /* Badge indicatore paginazione "1 / N" */
+            .indicatore-paginazione {
+                background-color: #ffffff;
+                color: var(--verde-scuro);
+                border: 1px solid var(--bordo-card);
+                font-weight: 700;
+                font-size: 0.85rem;
+                padding: 0.3rem 0.65rem;
+                border-radius: 6px;
             }
 
             /* Intestazione tabella in verde scuro con testo bianco */
@@ -165,13 +178,22 @@
                     Eventi (incluso ieri, oggi e 5 giorni in avanti)
                 </h5>
 
-                <!-- Pulsante rapido per azzerare i filtri attivi -->
-                @if (ViewBag.DataFiltro != null || ViewBag.StatoFiltro != null || ViewBag.UsernameFiltro != null)
-                {
-                    <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-secondary">
-                        Rimuovi filtri attivi
-                    </a>
-                }
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Indicatore pagina corrente / totale pagine (es. "1 / 4") -->
+                    <span id="indicatorePagina"
+                          class="indicatore-paginazione"
+                          title="Paginazione automatica eventi">
+                        @paginaIniziale / @totalePagineIniziale
+                    </span>
+
+                    <!-- Pulsante rapido per azzerare i filtri attivi -->
+                    @if (ViewBag.DataFiltro != null || ViewBag.StatoFiltro != null || ViewBag.UsernameFiltro != null)
+                    {
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-sm btn-outline-secondary">
+                            Rimuovi filtri attivi
+                        </a>
+                    }
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -235,10 +257,8 @@
                         </tr>
                     </thead>
 
-                    <!-- Righe caricate tramite partial view e aggiornate da SignalR -->
-                    <tbody id="righeEventi">
-                        @await Html.PartialAsync("_RigheEventi", Model)
-                    </tbody>
+                    <!-- Righe caricate tramite partial view e aggiornate da SignalR e paginazione automatica -->
+                    @await Html.PartialAsync("_RigheEventi", Model)
                 </table>
             </div>
         </div>
@@ -247,7 +267,7 @@
 
     <!-- Logo JUNIORSOFT ancorato a fine pagina -->
     <footer class="text-center py-3 mt-auto">
-        <img src="~/images/sfondoJRgreen.jpeg"
+        <img src="~/images/logoJR.png"
              alt="Logo JUNIORSOFT"
              class="img-fluid"
              style="max-width: 260px; height: auto;" />
@@ -392,26 +412,156 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+            // Gestisce la paginazione "1 / N" con rotazione automatica a timer.
+            // Se c'è o rimane una sola pagina, la rotazione non parte o si ferma.
+            function gestisciPaginazioneAuto({
+                contenitoreRigheId,          // id dell'elemento HTML dove inserire le righe
+                indicatoreId,                // id dell'elemento HTML dove scrivere "1 / N"
+                urlBase,                     // URL del server (preserva eventuali filtri attivi)
+                paginaIniziale = 1,          // pagina da cui partire
+                totalePagineIniziale = 1,    // quante pagine ci sono all'inizio
+                intervalloMs = 10000         // ogni quanti millisecondi cambiare pagina (10000 = 10 secondi)
+            }) {
+                const contenitore = document.getElementById(contenitoreRigheId);
+                const indicatore = document.getElementById(indicatoreId);
+
+                if (!contenitore || !urlBase) {
+                    return null;
+                }
+
+                let paginaCorrente = Math.max(1, paginaIniziale);
+                let totalePagine = Math.max(1, totalePagineIniziale);
+                let timer = null;
+                let caricamentoInCorso = false;
+
+                // Scrive "pagina corrente / totale" (es. "2 / 4") nell'indicatore
+                function aggiornaIndicatore() {
+                    if (indicatore) {
+                        indicatore.textContent = `${paginaCorrente} / ${totalePagine}`;
+                    }
+                }
+
+                // Ferma il timer, se è attivo
+                function fermaTimer() {
+                    if (timer !== null) {
+                        clearInterval(timer);
+                        timer = null;
+                    }
+                }
+
+                // Avvia il timer di rotazione solo se ci sono almeno 2 pagine
+                function avviaTimerSeNecessario() {
+                    fermaTimer();
+
+                    if (totalePagine <= 1) {
+                        return;
+                    }
+
+                    timer = setInterval(() => {
+                        if (totalePagine <= 1) {
+                            fermaTimer();
+                            return;
+                        }
+
+                        const prossimaPagina = paginaCorrente >= totalePagine ? 1 : paginaCorrente + 1;
+                        caricaPagina(prossimaPagina);
+                    }, intervalloMs);
+                }
+
+                // Aggiunge o aggiorna il parametro ?page=N mantenendo eventuali filtri già presenti nell'URL
+                function costruisciUrlPagina(numeroPagina) {
+                    const url = new URL(urlBase, window.location.origin);
+                    url.searchParams.set("page", String(numeroPagina));
+                    return url.toString();
+                }
+
+                // Scarica dal server le righe della pagina richiesta e aggiorna tabella e stato
+                async function caricaPagina(numeroPagina) {
+                    if (caricamentoInCorso) {
+                        return;
+                    }
+
+                    caricamentoInCorso = true;
+
+                    try {
+                        const response = await fetch(costruisciUrlPagina(numeroPagina), {
+                            headers: { "X-Requested-With": "XMLHttpRequest" }
+                        });
+
+                        if (!response.ok) {
+                            return;
+                        }
+
+                        const html = await response.text();
+
+                        // Estrae le righe e l'attributo data-total-pages dal <tbody> restituito dalla partial view
+                        const tempTable = document.createElement("table");
+                        tempTable.innerHTML = html.trim();
+                        const nuovoTbody = tempTable.querySelector("tbody");
+
+                        let nuovoTotale = totalePagine;
+
+                        if (nuovoTbody) {
+                            nuovoTotale = Math.max(1, parseInt(nuovoTbody.dataset.totalPages || "1", 10) || 1);
+                            contenitore.innerHTML = nuovoTbody.innerHTML;
+                            contenitore.dataset.totalPages = String(nuovoTotale);
+                            contenitore.dataset.currentPage = String(numeroPagina);
+                        } else {
+                            contenitore.innerHTML = html;
+                            nuovoTotale = Math.max(1, parseInt(contenitore.dataset.totalPages || "1", 10) || 1);
+                        }
+
+                        totalePagine = nuovoTotale;
+
+                        // Se il totale delle pagine è diminuito e la pagina corrente non esiste più, riparte da 1
+                        if (numeroPagina > totalePagine) {
+                            caricamentoInCorso = false;
+                            paginaCorrente = 1;
+                            return caricaPagina(1);
+                        }
+
+                        paginaCorrente = numeroPagina;
+                        aggiornaIndicatore();
+                        avviaTimerSeNecessario();
+                    } catch (errore) {
+                        console.error("Errore nel caricamento della pagina:", errore);
+                    } finally {
+                        caricamentoInCorso = false;
+                    }
+                }
+
+                // Avvio iniziale
+                aggiornaIndicatore();
+                avviaTimerSeNecessario();
+
+                return {
+                    // Ricarica la pagina corrente (usato da SignalR e dal controllo temporale ogni 60s)
+                    ricaricaDaSignalR: () => caricaPagina(paginaCorrente),
+                    ferma: fermaTimer
+                };
+            }
+
+            // Inizializza la paginazione automatica sulla Dashboard
+            const paginazione = gestisciPaginazioneAuto({
+                contenitoreRigheId: "righeEventi",
+                indicatoreId: "indicatorePagina",
+                urlBase: window.location.href,
+                paginaIniziale: @paginaIniziale,
+                totalePagineIniziale: @totalePagineIniziale,
+                intervalloMs: 10000
+            });
+
+            // Ricarica la pagina corrente mantenendo filtri e stato della paginazione
+            async function aggiornaEventi() {
+                if (paginazione) {
+                    await paginazione.ricaricaDaSignalR();
+                }
+            }
+
             // Connessione all'Hub SignalR
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("/eventiHub")
                 .build();
-
-            // Recupera dal server l'HTML aggiornato delle righe e sostituisce il tbody
-            async function aggiornaEventi() {
-                const risposta = await fetch(window.location.href, {
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest"
-                    }
-                });
-
-                if (!risposta.ok) {
-                    throw new Error("Errore durante l'aggiornamento degli eventi");
-                }
-
-                const html = await risposta.text();
-                document.getElementById("righeEventi").innerHTML = html;
-            }
 
             // Aggiorna la tabella quando il server notifica una modifica agli eventi
             connection.on("AggiornaEventi", aggiornaEventi);
@@ -420,7 +570,7 @@
                 .then(() => console.log("Connessione SignalR stabilita!"))
                 .catch(err => console.error("Errore di connessione", err));
 
-            // Aggiornamento periodico ogni 60 secondi come controllo di sicurezza
+            // Aggiornamento periodico ogni 60 secondi per riallineare i colori temporali delle righe (ritardo / imminente)
             setInterval(() => {
                 aggiornaEventi()
                     .catch(err => console.error("Errore aggiornamento automatico", err));

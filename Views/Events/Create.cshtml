@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
     <style>
-            /* Palette verde e bianco ispirata alla barra superiore e al bordo inferiore del riferimento */
+            /* Palette verde e bianco coerente con il resto dell'applicazione */
             :root {
                 --verde-principale: #0e6b47;
                 --verde-scuro: #084c32;
@@ -24,7 +24,7 @@
                 --verde-bordo-basso: #6ca83b;
             }
 
-            /* Imposta la struttura a colonna per mantenere il footer in fondo */
+            /* Layout a colonna per mantenere il footer in fondo */
             body.create-page {
                 display: flex;
                 flex-direction: column;
@@ -34,13 +34,13 @@
                 border-bottom: 8px solid var(--verde-bordo-basso);
             }
 
-            /* Fascia superiore verde in stile barra di navigazione */
+            /* Barra superiore verde */
             .top-header-bar {
                 background-color: var(--verde-principale);
                 color: #ffffff;
                 padding: 0.75rem 1.5rem;
                 border-bottom: 3px solid var(--verde-scuro);
-                flex-shrink: 0; /* Evita che l'header si schiacci */
+                flex-shrink: 0;
             }
 
             .top-header-title {
@@ -92,7 +92,7 @@
 </head>
 <body class="create-page">
 
-    <!-- Barra superiore verde coerente con il design di riferimento -->
+    <!-- Barra superiore verde -->
     <header class="top-header-bar">
         <div class="container d-flex justify-content-between align-items-center">
             <span class="top-header-title">Gestione Eventi Magazzino — Amministrazione</span>
@@ -103,8 +103,10 @@
     </header>
 
     <main class="container d-flex flex-column flex-grow-1 justify-content-center my-4 my-md-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-9 col-xl-8">
+
+        <!-- Modifica centratura: .row.justify-content-center allinea al centro la colonna del form -->
+        <div class="row justify-content-center w-100 mx-0">
+            <div class="col-lg-9 col-xl-8 px-0 px-sm-2">
 
                 <div class="card event-form-card">
                     <div class="card-body p-4">
@@ -116,28 +118,39 @@
 
                             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                            <!-- Assegnatario principale e altri operatori affiancati -->
-                            <div class="row">
-                                <div class="col-sm-6 mb-3">
-                                    <label asp-for="Username" class="form-label"></label>
-                                    <select asp-for="Username"
-                                            asp-items="ViewBag.Utenti"
-                                            class="form-select">
-                                        <option value="">Seleziona un assegnatario</option>
-                                    </select>
-                                    <span asp-validation-for="Username" class="text-danger"></span>
+                            <!-- Operatore assegnatario con ricerca live collegata allo script -->
+                            <div class="mb-3">
+                                <label class="form-label" for="ricercaUtente">Operatore assegnatario</label>
+                                <div class="position-relative">
+                                    <!-- Campo di ricerca per filtrare gli operatori -->
+                                    <input type="text"
+                                           id="ricercaUtente"
+                                           class="form-control"
+                                           placeholder="Cerca operatore..."
+                                           autocomplete="off" />
+
+                                    <!-- Contenitore dei suggerimenti restituiti dal server -->
+                                    <div id="risultatiRicerca"
+                                         class="list-group position-absolute w-100 shadow-sm"
+                                         style="z-index: 200; display: none;">
+                                    </div>
                                 </div>
 
-                                <div class="col-sm-6 mb-3">
-                                    <label asp-for="AltriOperatori" class="form-label"></label>
-                                    <input asp-for="AltriOperatori"
-                                           class="form-control"
-                                           placeholder="esempio: Mario Rossi, Angela Bianchi" />
-                                    <span asp-validation-for="AltriOperatori" class="text-danger"></span>
-                                </div>
+                                <!-- Campo nascosto valorizzato solo quando l'utente seleziona un risultato valido -->
+                                <input type="hidden" asp-for="Username" id="usernameRicerca" />
+                                <span asp-validation-for="Username" class="text-danger"></span>
                             </div>
 
-                            <!-- Descrizione dell'evento a larghezza piena per maggiore leggibilità -->
+                            <!-- Altri operatori coinvolti -->
+                            <div class="mb-3">
+                                <label asp-for="AltriOperatori" class="form-label"></label>
+                                <input asp-for="AltriOperatori"
+                                       class="form-control"
+                                       placeholder="esempio: Mario Rossi, Angela Bianchi" />
+                                <span asp-validation-for="AltriOperatori" class="text-danger"></span>
+                            </div>
+
+                            <!-- Descrizione dell'evento -->
                             <div class="mb-3">
                                 <label asp-for="Evento" class="form-label"></label>
                                 <textarea asp-for="Evento"
@@ -189,7 +202,7 @@
                                 </div>
                             </div>
 
-                            <!-- Azioni principali e navigazione verso la dashboard -->
+                            <!-- Azioni principali e ritorno alla dashboard -->
                             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4 pt-3 border-top">
                                 <a asp-controller="Home"
                                    asp-action="Index"
@@ -203,7 +216,6 @@
                             </div>
 
                         </form>
-                        <!-- Fine form principale -->
 
                     </div>
                 </div>
@@ -213,7 +225,7 @@
 
         <!-- Logo JUNIORSOFT posizionato sotto la card -->
         <footer class="text-center pb-3 mt-4">
-            <img src="~/images/sfondoJRgreen.jpeg"
+            <img src="~/images/logoJR.png"
                  alt="Logo JUNIORSOFT"
                  class="img-fluid"
                  style="max-width: 260px; height: auto;" />
@@ -224,5 +236,98 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+
+    <!-- Ricerca asincrona dell'operatore a partire da almeno 2 caratteri -->
+    <script>
+            function inizializzaRicerca(inputId, risultatiId, usernameId) {
+                const input = document.getElementById(inputId);
+                const risultati = document.getElementById(risultatiId);
+                const username = document.getElementById(usernameId);
+
+                // Esce se manca un elemento necessario
+                if (!input || !risultati || !username) {
+                    return;
+                }
+
+                let timeout;
+
+                input.addEventListener("input", function () {
+                    // Annulla l'eventuale ricerca ancora in attesa
+                    clearTimeout(timeout);
+
+                    // Azzera l'operatore selezionato se il testo cambia
+                    username.value = "";
+                    risultati.innerHTML = "";
+                    risultati.style.display = "none";
+
+                    const termine = input.value.trim();
+
+                    // Avvia la ricerca solo da 2 caratteri in su
+                    if (termine.length < 2) {
+                        return;
+                    }
+
+                    // Attende 250 ms dall'ultima digitazione prima di interrogare il server
+                    timeout = setTimeout(async function () {
+                        try {
+                            const urlRicerca = '@Url.Action("Search", "Users")';
+
+                            // Richiede al server gli username corrispondenti
+                            const response = await fetch(
+                                `${urlRicerca}?term=${encodeURIComponent(termine)}`
+                            );
+
+                            if (!response.ok) {
+                                throw new Error("Errore durante la ricerca.");
+                            }
+
+                            const utenti = await response.json();
+
+                            // Ignora la risposta se nel frattempo il testo è cambiato
+                            if (input.value.trim() !== termine) {
+                                return;
+                            }
+
+                            risultati.innerHTML = "";
+
+                            if (!Array.isArray(utenti) || utenti.length === 0) {
+                                risultati.style.display = "none";
+                                return;
+                            }
+
+                            // Crea un suggerimento cliccabile per ogni username trovato
+                            utenti.forEach(function (utente) {
+                                const elemento = document.createElement("button");
+                                elemento.type = "button";
+                                elemento.className = "list-group-item list-group-item-action";
+                                elemento.textContent = utente;
+
+                                // Seleziona l'operatore e valorizza il campo inviato dal form
+                                elemento.addEventListener("click", function () {
+                                    input.value = utente;
+                                    username.value = utente;
+                                    risultati.style.display = "none";
+                                });
+
+                                risultati.appendChild(elemento);
+                            });
+
+                            risultati.style.display = "block";
+                        } catch (errore) {
+                            console.error(errore);
+                            risultati.innerHTML = "";
+                            risultati.style.display = "none";
+                        }
+                    }, 250);
+                });
+            }
+
+            // Attiva la ricerca nella pagina di creazione evento
+            inizializzaRicerca(
+                "ricercaUtente",
+                "risultatiRicerca",
+                "usernameRicerca"
+            );
+    </script>
 </body>
 </html>

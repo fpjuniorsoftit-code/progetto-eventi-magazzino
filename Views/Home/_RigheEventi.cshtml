@@ -1,69 +1,78 @@
 ﻿@model List<GestionEventiMagazzino.Models.EventoMagazzino>
 
-@foreach (var evento in Model)
-{
-    // Combina la data e l'ora di inizio dell'evento
-    DateTime inizioEvento = evento.dataEvento.ToDateTime(evento.oraInizio);
+@{
+    var totalPages = Math.Max(1, ViewBag.TotalPages as int? ?? 1);
+    var currentPage = Math.Max(1, ViewBag.CurrentPage as int? ?? 1);
+}
 
-    //recupera data e ora attuali
-    DateTime adesso = DateTime.Now;
-
-    //riga rimane neutra di default
-    string classeRiga = "";
-
-    //applica colori temporali solo ad eventi sospesi
-    if(evento.stato == "SOSPESO")
+<tbody id="righeEventi"
+       data-total-pages="@totalPages"
+       data-current-page="@currentPage">
+    @if (Model != null)
     {
-    //se l'ora di inizio è passata la riga diventa rossa
-        if(inizioEvento < adesso)
+        foreach (var evento in Model)
         {
-            classeRiga = "riga-evento-passato";
-        }
-     //se manca un'ora o meno la riga diventa arancione
-        else if (inizioEvento <= adesso.AddHours(1))
-        {
-            classeRiga = "riga-evento-imminente";
+            // Combina la data e l'ora di inizio dell'evento
+            DateTime inizioEvento = evento.dataEvento.ToDateTime(evento.oraInizio);
+
+            // Recupera data e ora attuali
+            DateTime adesso = DateTime.Now;
+
+            // La riga rimane neutra di default
+            string classeRiga = "";
+
+            // Applica colori temporali solo agli eventi sospesi
+            if (evento.stato == "SOSPESO")
+            {
+                // Se l'ora di inizio è passata, la riga diventa rossa
+                if (inizioEvento < adesso)
+                {
+                    classeRiga = "riga-evento-passato";
+                }
+                // Se manca un'ora o meno, la riga diventa arancione
+                else if (inizioEvento <= adesso.AddHours(1))
+                {
+                    classeRiga = "riga-evento-imminente";
+                }
+            }
+
+            <tr class="@classeRiga">
+                <td>@evento.evento</td>
+                <td>@evento.dataEvento.ToString("dd/MM/yyyy")</td>
+                <td>@evento.oraInizio.ToString("HH:mm")</td>
+                <td>@evento.oraFine.ToString("HH:mm")</td>
+                <td>
+                    @{
+                        string classeStato = evento.stato switch
+                        {
+                            "SOSPESO" => "stato-sospeso",
+                            "CANCELLATO" => "stato-cancellato",
+                            "CHIUSO" => "stato-chiuso",
+                            "IN CORSO" => "stato-in-corso",
+                            _ => ""
+                        };
+                    }
+                    <span class="@classeStato">
+                        @evento.statoDettaglio?.descrEvento
+                    </span>
+                </td>
+                <td class="text-center">
+                    <strong>@evento.utente?.username</strong>
+                </td>
+                <td>@evento.altriOperatori</td>
+
+                @if (User.IsInRole("Admin"))
+                {
+                    <td>
+                        <a asp-controller="Events"
+                           asp-action="Update"
+                           asp-route-id="@evento.eventoID"
+                           class="btn btn-danger btn-sm">
+                            Modifica
+                        </a>
+                    </td>
+                }
+            </tr>
         }
     }
-
-    <tr class="@classeRiga">
-        <td>@evento.evento</td>
-        <td>@evento.dataEvento.ToString("dd/MM/yyyy")</td>
-        <td>@evento.oraInizio.ToString("HH:mm")</td>
-        <td>@evento.oraFine.ToString("HH:mm")</td>
-        <td>
-        @{
-                string classeStato = evento.stato switch
-                {
-
-                    "SOSPESO" => "stato-sospeso",
-                    "CANCELLATO" => "stato-cancellato",
-                    "CHIUSO" => "stato-chiuso",
-                    "IN CORSO" => "stato-in-corso",
-                    _ => ""
-
-                };
-                }
-                <span class="@classeStato">
-            @evento.statoDettaglio.descrEvento
-                </span>
-            
-        </td>
-        <td class="text-center">
-            <strong>@evento.utente.username</strong>
-        </td>
-        <td>@evento.altriOperatori</td>
-
-        @if (User.IsInRole("Admin"))
-        {
-            <td>
-                <a asp-controller="Events"
-                   asp-action="Update"
-                   asp-route-id="@evento.eventoID"
-                   class="btn btn-danger btn-sm">
-                    Modifica
-                </a>
-            </td>
-        }
-    </tr>
-}
+</tbody>

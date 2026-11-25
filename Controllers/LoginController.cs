@@ -59,7 +59,7 @@ namespace GestionEventiMagazzino.Controllers
 
             var utente = await context.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.username == model.Username);
+                .FirstOrDefaultAsync(u => EF.Functions.Collate(u.username,"Latin1_General_100_CS_AS") == model.Username); //questo rende il case da INSENSITIVE A SENSITIVE
 
             if (utente == null ||
                 !passwordService.VerifyPassword(utente, model.Password))
